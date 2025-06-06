@@ -1,5 +1,7 @@
+'use client'
 import 'katex/dist/katex.min.css';
 
+import React, { useCallback, useMemo, useState } from 'react';
 import { Geist_Mono } from 'next/font/google';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight, oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -8,7 +10,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Latex from 'react-latex-next';
 import Marked, { ReactRenderer } from 'marked-react';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {

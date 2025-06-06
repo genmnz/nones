@@ -11,62 +11,62 @@ import { getChatsByUserId, deleteChatById, updateChatVisiblityById, getChatById,
 import { groq } from '@ai-sdk/groq';
 import { openai } from '@ai-sdk/openai';
 
-export async function suggestQuestions(history: any[]) {
-  'use server';
+// export async function suggestQuestions(history: any[]) {
+//   'use server';
 
-  console.log(history);
+//   console.log(history);
 
-  const { object } = await generateObject({
-    model: openai("gpt-4.1-nano"),
-    temperature: 1,
-    maxTokens: 300,
-    topP: 0.3,
-    topK: 7,
-    system:
-      `You are a search engine follow up query/questions generator. You MUST create EXACTLY 3 questions for the search engine based on the message history.
+//   const { object } = await generateObject({
+//     model: openai("gpt-4.1-nano"),
+//     temperature: 1,
+//     maxTokens: 300,
+//     topP: 0.3,
+//     topK: 7,
+//     system:
+//       `You are a search engine follow up query/questions generator. You MUST create EXACTLY 3 questions for the search engine based on the message history.
 
-### Question Generation Guidelines:
-- Create exactly 3 questions that are open-ended and encourage further discussion
-- Questions must be concise (5-10 words each) but specific and contextually relevant
-- Each question must contain specific nouns, entities, or clear context markers
-- NEVER use pronouns (he, she, him, his, her, etc.) - always use proper nouns from the context
-- Questions must be related to tools available in the system
-- Questions should flow naturally from previous conversation
+// ### Question Generation Guidelines:
+// - Create exactly 3 questions that are open-ended and encourage further discussion
+// - Questions must be concise (5-10 words each) but specific and contextually relevant
+// - Each question must contain specific nouns, entities, or clear context markers
+// - NEVER use pronouns (he, she, him, his, her, etc.) - always use proper nouns from the context
+// - Questions must be related to tools available in the system
+// - Questions should flow naturally from previous conversation
 
-### Tool-Specific Question Types:
-- Web search: Focus on factual information, current events, or general knowledge
-- Academic: Focus on scholarly topics, research questions, or educational content
-- YouTube: Focus on tutorials, how-to questions, or content discovery
-- Social media (X/Twitter): Focus on trends, opinions, or social conversations
-- Code/Analysis: Focus on programming, data analysis, or technical problem-solving
-- Weather: Redirect to news, sports, or other non-weather topics
-- Location: Focus on culture, history, landmarks, or local information
-- Finance: Focus on market analysis, investment strategies, or economic topics
+// ### Tool-Specific Question Types:
+// - Web search: Focus on factual information, current events, or general knowledge
+// - Academic: Focus on scholarly topics, research questions, or educational content
+// - YouTube: Focus on tutorials, how-to questions, or content discovery
+// - Social media (X/Twitter): Focus on trends, opinions, or social conversations
+// - Code/Analysis: Focus on programming, data analysis, or technical problem-solving
+// - Weather: Redirect to news, sports, or other non-weather topics
+// - Location: Focus on culture, history, landmarks, or local information
+// - Finance: Focus on market analysis, investment strategies, or economic topics
 
-### Context Transformation Rules:
-- For weather conversations → Generate questions about news, sports, or other non-weather topics
-- For programming conversations → Generate questions about algorithms, data structures, or code optimization
-- For location-based conversations → Generate questions about culture, history, or local attractions
-- For mathematical queries → Generate questions about related applications or theoretical concepts
-- For current events → Generate questions that explore implications, background, or related topics
+// ### Context Transformation Rules:
+// - For weather conversations → Generate questions about news, sports, or other non-weather topics
+// - For programming conversations → Generate questions about algorithms, data structures, or code optimization
+// - For location-based conversations → Generate questions about culture, history, or local attractions
+// - For mathematical queries → Generate questions about related applications or theoretical concepts
+// - For current events → Generate questions that explore implications, background, or related topics
 
-### Formatting Requirements:
-- No bullet points, numbering, or prefixes
-- No quotation marks around questions
-- Each question must be grammatically complete
-- Each question must end with a question mark
-- Questions must be diverse and not redundant
-- Do not include instructions or meta-commentary in the questions`,
-    messages: history,
-    schema: z.object({
-      questions: z.array(z.string()).describe('The generated questions based on the message history.')
-    }),
-  });
+// ### Formatting Requirements:
+// - No bullet points, numbering, or prefixes
+// - No quotation marks around questions
+// - Each question must be grammatically complete
+// - Each question must end with a question mark
+// - Questions must be diverse and not redundant
+// - Do not include instructions or meta-commentary in the questions`,
+//     messages: history,
+//     schema: z.object({
+//       questions: z.array(z.string()).describe('The generated questions based on the message history.')
+//     }),
+//   });
 
-  return {
-    questions: object.questions
-  };
-}
+//   return {
+//     questions: object.questions
+//   };
+// }
 
 export async function checkImageModeration(images: any) {
   const { text } = await generateText({
@@ -99,7 +99,7 @@ export async function generateTitleFromUserMessage({
   message: UIMessage;
 }) {
   const { text: title } = await generateText({
-    model: scira.languageModel('scira-4o'),
+    model: scira.languageModel('mind-google-flash-2.0-lite'),
     system: `\n
     - you will generate a short title based on the first message a user begins a conversation with
     - ensure it is not more than 80 characters long

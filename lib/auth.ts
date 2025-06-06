@@ -6,7 +6,7 @@ import { config } from 'dotenv';
 import { serverEnv } from "@/env/server";
 
 config({
-    path: '.env.local',
+    path: '.env',
 });
 
 export const auth = betterAuth({
@@ -14,18 +14,18 @@ export const auth = betterAuth({
         provider: "pg",
     }),
     socialProviders: {
-        github: {
-            clientId: serverEnv.GITHUB_CLIENT_ID,
-            clientSecret: serverEnv.GITHUB_CLIENT_SECRET,
-        },
+        // github: {
+        //     clientId: serverEnv.GITHUB_CLIENT_ID,
+        //     clientSecret: serverEnv.GITHUB_CLIENT_SECRET,
+        // },
         google: { 
             clientId: serverEnv.GOOGLE_CLIENT_ID, 
             clientSecret: serverEnv.GOOGLE_CLIENT_SECRET, 
         },
-        twitter: { 
-            clientId: serverEnv.TWITTER_CLIENT_ID, 
-            clientSecret: serverEnv.TWITTER_CLIENT_SECRET, 
-        },
+        // twitter: { 
+        //     clientId: serverEnv.TWITTER_CLIENT_ID, 
+        //     clientSecret: serverEnv.TWITTER_CLIENT_SECRET, 
+        // },
     },
     plugins: [nextCookies()],
     trustedOrigins: ["http://localhost:3000", "https://scira.ai", "https://www.scira.ai"],

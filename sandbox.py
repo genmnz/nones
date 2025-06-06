@@ -4,7 +4,7 @@ import time
 daytona = Daytona(DaytonaConfig(api_key=""))
 
 # Generate a unique name for the image
-image_name = f"scira-analysis:{int(time.time())}"
+image_name = f"mind-analysis:{int(time.time())}"
 
 # Create a Python image
 image = (

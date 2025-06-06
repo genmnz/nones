@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
         } : false,
     },
     experimental: {
+        viewTransition: true,
         optimizePackageImports: ["@phosphor-icons/react"],
         nodeMiddleware: true,
         serverActions: {
@@ -18,41 +19,41 @@ const nextConfig: NextConfig = {
     },
     transpilePackages: ["geist"],
     output: 'standalone',
-    async headers() {
-        return [
-            {
-                source: '/(.*)',
-                headers: [
-                    {
-                        key: 'X-Content-Type-Options',
-                        value: 'nosniff',
-                    },
-                    {
-                        key: 'X-Frame-Options',
-                        value: 'DENY',
-                    },
-                    {
-                        key: 'Referrer-Policy',
-                        value: 'strict-origin-when-cross-origin',
-                    },
-                ],
-            },
-        ]
-    },
-    async redirects() {
-        return [
-            {
-                source: '/ph',
-                destination: 'https://www.producthunt.com/posts/scira',
-                permanent: true,
-            },
-            {
-                source: '/raycast',
-                destination: 'https://www.raycast.com/zaidmukaddam/scira',
-                permanent: true,
-            }
-        ]
-    },
+    // async headers() {
+    //     return [
+    //         {
+    //             source: '/(.*)',
+    //             headers: [
+    //                 {
+    //                     key: 'X-Content-Type-Options',
+    //                     value: 'nosniff',
+    //                 },
+    //                 {
+    //                     key: 'X-Frame-Options',
+    //                     value: 'DENY',
+    //                 },
+    //                 {
+    //                     key: 'Referrer-Policy',
+    //                     value: 'strict-origin-when-cross-origin',
+    //                 },
+    //             ],
+    //         },
+    //     ]
+    // },
+    // async redirects() {
+    //     return [
+    //         {
+    //             source: '/ph',
+    //             destination: 'https://www.producthunt.com/posts/scira',
+    //             permanent: true,
+    //         },
+    //         {
+    //             source: '/raycast',
+    //             destination: 'https://www.raycast.com/zaidmukaddam/scira',
+    //             permanent: true,
+    //         }
+    //     ]
+    // },
     images: {
         dangerouslyAllowSVG: true,
         remotePatterns: [
@@ -150,6 +151,9 @@ const nextConfig: NextConfig = {
         formats: ['image/webp'],
         minimumCacheTTL: 60,
         unoptimized: false,
+    },
+    devIndicators: {
+        appIsrStatus: false,
     },
 };
 

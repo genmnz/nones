@@ -1,25 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
-"use client";
+'use client'
 import 'katex/dist/katex.min.css';
-
 
 import { useChat, UseChatOptions } from '@ai-sdk/react';
 import { CalendarBlank, Clock as PhosphorClock } from '@phosphor-icons/react';
 import { parseAsString, useQueryState } from 'nuqs';
 import { toast } from 'sonner';
-import React, {
-    memo,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState
-} from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import FormComponent from '@/components/ui/form-component';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn, SearchGroupId, invalidateChatsCache } from '@/lib/utils';
-import { getCurrentUser, suggestQuestions, updateChatVisibility } from '@/app/actions';
+import { getCurrentUser, /*suggestQuestions,*/ updateChatVisibility } from '@/app/actions';
 import Messages from '@/components/messages';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '@/lib/db/schema';
@@ -50,7 +42,7 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
     const [q] = useQueryState('q', parseAsString.withDefault(''))
 
     // Use localStorage hook directly for model selection with a default
-    const [selectedModel, setSelectedModel] = useLocalStorage('scira-selected-model', 'scira-default');
+    const [selectedModel, setSelectedModel] = useLocalStorage('mind-selected-model', 'mind-default');
 
     const initialState = useMemo(() => ({
         query: query || q,
@@ -65,7 +57,7 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const initializedRef = useRef(false);
-    const [selectedGroup, setSelectedGroup] = useLocalStorage<SearchGroupId>('scira-selected-group', 'web');
+    const [selectedGroup, setSelectedGroup] = useLocalStorage<SearchGroupId>('mind-selected-group', 'web');
     const [hasSubmitted, setHasSubmitted] = React.useState(false);
     const [hasManuallyScrolled, setHasManuallyScrolled] = useState(false);
     const isAutoScrollingRef = useRef(false);
@@ -78,10 +70,8 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
     // Memoized greeting to prevent flickering
     const personalizedGreeting = useMemo(() => {
         if (!user?.name) return "What do you want to explore?";
-        
         const firstName = user.name.trim().split(' ')[0];
         if (!firstName) return "What do you want to explore?";
-        
         const greetings = [
             `Hey ${firstName}! Let's dive in!`,
             `${firstName}, what's the question?`,
@@ -103,7 +93,7 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
 
     // Sign-in prompt dialog state
     const [showSignInPrompt, setShowSignInPrompt] = useState(false);
-    const [hasShownSignInPrompt, setHasShownSignInPrompt] = useLocalStorage('scira-signin-prompt-shown', false);
+    const [hasShownSignInPrompt, setHasShownSignInPrompt] = useLocalStorage('mind-signin-prompt-shown', false);
     const signInTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Generate a consistent ID for new chats
@@ -190,8 +180,8 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
                     { role: "user", content: lastSubmittedQueryRef.current },
                     { role: "assistant", content: message.content },
                 ];
-                const { questions } = await suggestQuestions(newHistory);
-                setSuggestedQuestions(questions);
+            //     const { questions } = await suggestQuestions(newHistory);
+            //     setSuggestedQuestions(questions);
             }
         },
         onError: (error) => {
@@ -264,12 +254,12 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
                         { role: "user", content: lastUserMessage.content },
                         { role: "assistant", content: lastAssistantMessage.content },
                     ];
-                    try {
-                        const { questions } = await suggestQuestions(newHistory);
-                        setSuggestedQuestions(questions);
-                    } catch (error) {
-                        console.error("Error generating suggested questions:", error);
-                    }
+                    // try {
+                    //     const { questions } = await suggestQuestions(newHistory);
+                    //     setSuggestedQuestions(questions);
+                    // } catch (error) {
+                    //     console.error("Error generating suggested questions:", error);
+                    // }
                 }
             }
         };
@@ -520,7 +510,7 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
                         (!user && selectedVisibilityType === 'private')
                     ) && (
                         <div
-                            className="fixed bottom-6 sm:bottom-4 left-0 right-0 w-full max-w-[26rem] sm:max-w-2xl mx-auto z-20"
+                            className="fixed bottom-4 sm:bottom-4 left-0 right-0 w-full max-w-[26rem] sm:max-w-2xl mx-auto z-20"
                         >
                             <FormComponent
                                 chatId={chatId}
@@ -554,7 +544,5 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
     );
 });
 
-// Add a display name for the memoized component for better debugging
 ChatInterface.displayName = "ChatInterface";
-
 export { ChatInterface }; 

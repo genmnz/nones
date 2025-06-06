@@ -10,78 +10,59 @@ import { cn } from '@/lib/utils';
 import { ArrowUpRight, LucideIcon, User2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
 // UI Components
 import { BorderTrail } from '@/components/core/border-trail';
 import { TextShimmer } from '@/components/core/text-shimmer';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardFooter,
-} from "@/components/ui/card";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Icons
-import {
-    Book,
-    Building,
-    ChevronDown,
-    Cloud,
-    Copy,
-    ExternalLink,
-    Film,
-    Globe,
-    Loader2,
-    MapPin,
-    Pause,
-    Plane,
-    Play as PlayIcon,
-    Server,
-    TextIcon,
-    TrendingUpIcon,
-    Tv,
-    XCircle,
-    YoutubeIcon,
-} from 'lucide-react';
+import { Book, Building, ChevronDown, Cloud, Copy, ExternalLink, Film, Globe, Loader2, MapPin, Pause, Plane, Play as PlayIcon, Server, TextIcon, TrendingUpIcon, Tv, XCircle, YoutubeIcon } from 'lucide-react';
 import { Memory, Clock as PhosphorClock, RedditLogo, RoadHorizon, XLogo } from '@phosphor-icons/react';
 
 // Components
-import { FlightTracker } from '@/components/flight-tracker';
-import InteractiveChart from '@/components/interactive-charts';
-import { MapComponent, MapContainer } from '@/components/map-components';
-import TMDBResult from '@/components/movie-info';
-import MultiSearch from '@/components/multi-search';
-import NearbySearchMapView from '@/components/nearby-search-map-view';
-import TrendingResults from '@/components/trending-tv-movies-results';
-import AcademicPapersCard from '@/components/academic-papers';
-import WeatherChart from '@/components/weather-chart';
-import InteractiveStockChart from '@/components/interactive-stock-chart';
-import { CurrencyConverter } from '@/components/currency_conv';
-import { ExtremeSearch } from '@/components/extreme-search';
-import MemoryManager from '@/components/memory-manager';
-import MCPServerList from '@/components/mcp-server-list';
-import RedditSearch from '@/components/reddit-search';
+// import { FlightTracker } from '@/components/flight-tracker';
+// import InteractiveChart from '@/components/interactive-charts';
+// import { MapComponent, MapContainer } from '@/components/map-components';
+// import TMDBResult from '@/components/movie-info';
+// import MultiSearch from '@/components/multi-search';
+// import NearbySearchMapView from '@/components/nearby-search-map-view';
+// import TrendingResults from '@/components/trending-tv-movies-results';
+// import AcademicPapersCard from '@/components/academic-papers';
+// import WeatherChart from '@/components/weather-chart';
+// import InteractiveStockChart from '@/components/interactive-stock-chart';
+// import { CurrencyConverter } from '@/components/currency_conv';
+// import { ExtremeSearch } from '@/components/extreme-search';
+// import MemoryManager from '@/components/memory-manager';
+// import MCPServerList from '@/components/mcp-server-list';
+// import RedditSearch from '@/components/reddit-search';
+const FlightTracker = dynamic(() => import('@/components/flight-tracker').then(mod => mod.FlightTracker), { ssr: false });
+const InteractiveChart = dynamic(() => import('@/components/interactive-charts'), { ssr: false });
+const MapComponent = dynamic(() => import('@/components/map-components').then(mod => mod.MapComponent), { ssr: false });
+const MapContainer = dynamic(() => import('@/components/map-components').then(mod => mod.MapContainer), { ssr: false });
+const TMDBResult = dynamic(() => import('@/components/movie-info'), { ssr: false });
+const MultiSearch = dynamic(() => import('@/components/multi-search'), { ssr: false });
+const NearbySearchMapView = dynamic(() => import('@/components/nearby-search-map-view'), { ssr: false });
+const TrendingResults = dynamic(() => import('@/components/trending-tv-movies-results'), { ssr: false });
+const AcademicPapersCard = dynamic(() => import('@/components/academic-papers'), { ssr: false });
+const WeatherChart = dynamic(() => import('@/components/weather-chart'), { ssr: false });
+const InteractiveStockChart = dynamic(() => import('@/components/interactive-stock-chart'), { ssr: false });
+const CurrencyConverter = dynamic(() => import('@/components/currency_conv').then(mod => mod.CurrencyConverter), { ssr: false });
+const ExtremeSearch = dynamic(() => import('@/components/extreme-search').then(mod => mod.ExtremeSearch), { ssr: false });
+const MemoryManager = dynamic(() => import('@/components/memory-manager'), { ssr: false });
+const MCPServerList = dynamic(() => import('@/components/mcp-server-list'), { ssr: false });
+const RedditSearch = dynamic(() => import('@/components/reddit-search'), { ssr: false });
 import XSearch from '@/components/x-search';
 
 // Actions
 import { generateSpeech } from '@/app/actions';
-import Image from 'next/image';
 
 // Interfaces
 interface VideoDetails {
@@ -1461,7 +1442,7 @@ const ToolInvocationListView = memo(
                     // Live Clock component that updates every second
                     const LiveClock = memo(() => {
                         const [time, setTime] = useState(() => new Date());
-                        const timerRef = useRef<NodeJS.Timeout>();
+                        const timerRef = useRef<NodeJS.Timeout | null>(null);
 
                         useEffect(() => {
                             // Sync with the nearest second

@@ -1,3 +1,4 @@
+'use client'
 import React, { useMemo, useState } from 'react';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Area, AreaChart, Tooltip, Legend } from "recharts";
 import { Card, CardHeader, CardContent, CardTitle, CardFooter } from "@/components/ui/card";

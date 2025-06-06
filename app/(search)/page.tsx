@@ -6,7 +6,7 @@ import { InstallPrompt } from '@/components/InstallPrompt';
 
 const Home = () => {
     return (
-        <Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
             <ChatInterface  />
             <InstallPrompt />
         </Suspense>

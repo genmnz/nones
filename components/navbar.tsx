@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+'use client'
 import React, { useState, memo } from 'react';
 import Link from 'next/link';
 import { Plus, Globe, Lock, Copy, Check } from 'lucide-react';
@@ -7,11 +8,7 @@ import { Button } from '@/components/ui/button';
 import { UserProfile } from '@/components/user-profile';
 import { ChatHistoryButton } from '@/components/chat-history-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
 import { User } from '@/lib/db/schema';
 import { LinkedinLogo, RedditLogo, Share, XLogo } from '@phosphor-icons/react';
@@ -51,7 +48,7 @@ const Navbar = memo(({
 
         if (!chatId) return;
 
-        const url = `https://scira.ai/search/${chatId}`;
+        const url = `${window.location.origin}/search/${chatId}`;
         navigator.clipboard.writeText(url);
         setCopied(true);
         toast.success("Link copied to clipboard");
@@ -60,7 +57,7 @@ const Navbar = memo(({
     };
 
     // Generate the share URL
-    const shareUrl = chatId ? `https://scira.ai/search/${chatId}` : '';
+    const shareUrl = chatId ? `${window.location.origin}/search/${chatId}` : '';
 
     // Social media share handlers
     const handleShareLinkedIn = (e: React.MouseEvent) => {
@@ -131,7 +128,7 @@ const Navbar = memo(({
                                         <DropdownMenuTrigger asChild>
                                             <Button
                                                 variant="secondary"
-                                                className="rounded-md pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/80 border border-blue-300 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors focus:outline-none! focus:ring-0!"
+                                                className="w-fit !flex rounded-md pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/80 border border-blue-300 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors focus:outline-none! focus:ring-0!"
                                                 disabled={isChangingVisibility}
                                             >
                                                 {isChangingVisibility ? (
@@ -143,7 +140,7 @@ const Navbar = memo(({
                                                     <>
                                                         <Globe size={16} className="text-blue-600 dark:text-blue-300" />
                                                         <span className="text-sm font-medium text-blue-700 dark:text-blue-200">Public</span>
-                                                        <Copy size={14} className="ml-1.5 text-blue-600 dark:text-blue-300 opacity-80" />
+                                                        {/* <Copy size={14} className="ml-1.5 text-blue-600 dark:text-blue-300 opacity-80" /> */}
                                                     </>
                                                 )}
                                             </Button>

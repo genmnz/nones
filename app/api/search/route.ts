@@ -35,6 +35,7 @@ import { auth } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { geolocation } from "@vercel/functions";
 import { getTweet } from 'react-tweet/api';
+import { deduplicateByDomainAndUrl, extractDomain } from '@/lib/utils';
 
 type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
 type ResponseMessage = ResponseMessageWithoutId & { id: string };
@@ -75,32 +76,14 @@ function getStreamContext() {
 }
 
 
-// Add currency symbol mapping at the top of the file
 const CURRENCY_SYMBOLS = {
-    USD: '$',   // US Dollar
-    EUR: '€',   // Euro
-    GBP: '£',   // British Pound
-    JPY: '¥',   // Japanese Yen
-    CNY: '¥',   // Chinese Yuan
-    INR: '₹',   // Indian Rupee
-    RUB: '₽',   // Russian Ruble
-    KRW: '₩',   // South Korean Won
-    BTC: '₿',   // Bitcoin
-    THB: '฿',   // Thai Baht
-    BRL: 'R$',  // Brazilian Real
-    PHP: '₱',   // Philippine Peso
-    ILS: '₪',   // Israeli Shekel
-    TRY: '₺',   // Turkish Lira
-    NGN: '₦',   // Nigerian Naira
-    VND: '₫',   // Vietnamese Dong
-    ARS: '$',   // Argentine Peso
-    ZAR: 'R',   // South African Rand
-    AUD: 'A$',  // Australian Dollar
-    CAD: 'C$',  // Canadian Dollar
-    SGD: 'S$',  // Singapore Dollar
-    HKD: 'HK$', // Hong Kong Dollar
-    NZD: 'NZ$', // New Zealand Dollar
-    MXN: 'Mex$' // Mexican Peso
+    USD: '$', EUR: '€', GBP: '£',
+    JPY: '¥', CNY: '¥', INR: '₹', RUB: '₽',
+    KRW: '₩', BTC: '₿', THB: '฿', BRL: 'R$',
+    PHP: '₱', 
+    ILS: '₪', TRY: '₺', NGN: '₦', VND: '₫',
+    ARS: '$', ZAR: 'R', AUD: 'A$', CAD: 'C$',
+    SGD: 'S$', HKD: 'HK$', NZD: 'NZ$', MXN: 'Mex$'
 } as const;
 
 interface MapboxFeature {
@@ -292,28 +275,6 @@ async function isValidImageUrl(url: string): Promise<{ valid: boolean; redirecte
 }
 
 
-const extractDomain = (url: string): string => {
-    const urlPattern = /^https?:\/\/([^/?#]+)(?:[/?#]|$)/i;
-    return url.match(urlPattern)?.[1] || url;
-};
-
-const deduplicateByDomainAndUrl = <T extends { url: string }>(items: T[]): T[] => {
-    const seenDomains = new Set<string>();
-    const seenUrls = new Set<string>();
-
-    return items.filter(item => {
-        const domain = extractDomain(item.url);
-        const isNewUrl = !seenUrls.has(item.url);
-        const isNewDomain = !seenDomains.has(domain);
-
-        if (isNewUrl && isNewDomain) {
-            seenUrls.add(item.url);
-            seenDomains.add(domain);
-            return true;
-        }
-        return false;
-    });
-};
 
 // Initialize Exa client
 const exa = new Exa(serverEnv.EXA_API_KEY);
@@ -458,9 +419,9 @@ export async function POST(req: Request) {
             const result = streamText({
                 model: scira.languageModel(model),
                 messages: convertToCoreMessages(messages),
-                ...(!model.includes('scira-anthropic') || !model.includes('scira-o4-mini') ? {
+                ...(!model.includes('mind-anthropic') || !model.includes('mind-o4-mini') ? {
                     temperature: 0,
-                } : (!model.includes('scira-qwq') ? {
+                } : (!model.includes('mind-qwq') ? {
                     temperature: 0.6,
                     topP: 0.95,
                 } : {
@@ -477,17 +438,19 @@ export async function POST(req: Request) {
                 }),
                 providerOptions: {
                     google: {
-                        thinkingConfig: {
-                            includeThoughts: true,
-                            thinkingBudget: 10000,
-                        },
+                        ...(model.includes('thinking') ? {
+                            thinkingConfig: {
+                                includeThoughts: true,
+                                thinkingBudget: 1000,
+                            },
+                        } : {}),
                     },
                     openai: {
-                        ...(model === 'scira-o4-mini' ? {
+                        ...(model === 'mind-o4-mini' ? {
                             reasoningEffort: 'low',
                             strictSchemas: true,
                         } : {}),
-                        ...(model === 'scira-4o' ? {
+                        ...(model === 'mind-4o' ? {
                             parallelToolCalls: false,
                             strictSchemas: true,
                         } : {}),
@@ -499,12 +462,12 @@ export async function POST(req: Request) {
                                 return_citations: true
                             }
                         } : {}),
-                        ...(model === 'scira-default' ? {
+                        ...(model === 'mind-default' ? {
                             reasoningEffort: 'low',
                         } : {}),
                     },
                     anthropic: {
-                        ...(model === 'scira-anthropic-thinking' || model === 'scira-anthropic-pro-thinking' ? {
+                        ...(model === 'mind-anthropic-thinking' || model === 'mind-anthropic-pro-thinking' ? {
                             thinking: { type: 'enabled', budgetTokens: 12000 },
                         } : {}),
                     },
@@ -523,12 +486,12 @@ export async function POST(req: Request) {
                             interval: z.enum(['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']).describe('The interval of the chart. default is 1y.'),
                         }),
                         execute: async ({ title, icon, stock_symbols, currency_symbols, interval, news_queries }: { title: string; icon: string; stock_symbols: string[]; currency_symbols?: string[]; interval: string; news_queries: string[] }) => {
-                            console.log('Title:', title);
-                            console.log('Icon:', icon);
-                            console.log('Stock symbols:', stock_symbols);
-                            console.log('Currency symbols:', currency_symbols);
-                            console.log('Interval:', interval);
-                            console.log('News queries:', news_queries);
+                            // console.log('Title:', title);
+                            // console.log('Icon:', icon);
+                            // console.log('Stock symbols:', stock_symbols);
+                            // console.log('Currency symbols:', currency_symbols);
+                            // console.log('Interval:', interval);
+                            // console.log('News queries:', news_queries);
 
                             // Format currency symbols with actual symbols
                             const formattedCurrencySymbols = (currency_symbols || stock_symbols.map(() => 'USD')).map(currency => {
@@ -676,14 +639,14 @@ export async function POST(req: Request) {
                                     }
                                 });
 
-                                // Complete missing titles for financial reports
+                                // Complete missing titles for financial reports #flag
                                 for (const group of exaResults) {
                                     for (let i = 0; i < group.results.length; i++) {
                                         const result = group.results[i];
                                         if (!result.title || result.title.trim() === "") {
                                             try {
                                                 const { object } = await generateObject({
-                                                    model: openai.chat("gpt-4.1-nano"),
+                                                    model: scira.languageModel("mind-google-flash-2.0"),
                                                     prompt: `Complete the following financial report with an appropriate title. The report is about ${group.query} and contains this content: ${result.content.substring(0, 500)}...`,
                                                     schema: z.object({
                                                         title: z.string().describe("A descriptive title for the financial report")
@@ -733,7 +696,7 @@ plt.show()`
 
                             const daytona = new Daytona()
                             const sandbox = await daytona.create({
-                                image: "scira-analysis:1749032298",
+                                image: "mind-analysis:1749032298",
                                 language: 'python',
                                 target: SandboxTargetRegion.US,
                                 resources: {
@@ -825,7 +788,7 @@ print(f"Converted amount: {converted_amount}")
 
                             const daytona = new Daytona()
                             const sandbox = await daytona.create({
-                                image: "scira-analysis:1749032298",
+                                image: "mind-analysis:1749032298",
                                 language: 'python',
                                 target: SandboxTargetRegion.US,
                                 resources: {
@@ -1064,12 +1027,12 @@ print(f"Converted amount: {converted_amount}")
                             const tvly = tavily({ apiKey });
                             const includeImageDescriptions = true;
 
-                            console.log('Queries:', queries);
-                            console.log('Max Results:', maxResults);
-                            console.log('Topics:', topics);
-                            console.log('Search Depths:', searchDepth);
-                            console.log('Include Domains:', include_domains);
-                            console.log('Exclude Domains:', exclude_domains);
+                            // console.log('Queries:', queries);
+                            // console.log('Max Results:', maxResults);
+                            // console.log('Topics:', topics);
+                            // console.log('Search Depths:', searchDepth);
+                            // console.log('Include Domains:', include_domains);
+                            // console.log('Exclude Domains:', exclude_domains);
 
                             // Execute searches in parallel
                             const searchPromises = queries.map(async (query, index) => {
@@ -1602,7 +1565,7 @@ print(f"Converted amount: {converted_amount}")
 
                             const daytona = new Daytona()
                             const sandbox = await daytona.create({
-                                image: "scira-analysis:1749032298",
+                                image: "mind-analysis:1749032298",
                                 language: 'python',
                                 target: SandboxTargetRegion.US,
                                 resources: {
@@ -2199,7 +2162,8 @@ print(f"Converted amount: {converted_amount}")
                                 const data = await tvly.search(query, {
                                     maxResults: maxResults,
                                     timeRange: timeRange,
-                                    includeRawContent: true,
+                                    // includeRawContent: true,
+                                    includeRawContent: 'markdown',
                                     searchDepth: 'basic',
                                     topic: 'general',
                                     includeDomains: ["reddit.com"],
@@ -2261,7 +2225,7 @@ print(f"Converted amount: {converted_amount}")
                     const tool = tools[toolCall.toolName as keyof typeof tools];
 
                     const { object: repairedArgs } = await generateObject({
-                        model: scira.languageModel("scira-default"),
+                        model: scira.languageModel("mind-default"),
                         schema: tool.parameters,
                         prompt: [
                             `The model tried to call the tool "${toolCall.toolName}"` +
@@ -2292,14 +2256,14 @@ print(f"Converted amount: {converted_amount}")
                     }
                 },
                 onFinish: async (event) => {
-                    console.log('Fin reason: ', event.finishReason);
-                    console.log('Reasoning: ', event.reasoning);
-                    console.log('reasoning details: ', event.reasoningDetails);
-                    console.log('Steps: ', event.steps);
-                    console.log('Messages: ', event.response.messages);
-                    console.log('Response Body: ', event.response.body);
-                    console.log('Provider metadata: ', event.providerMetadata);
-                    console.log("Sources: ", event.sources);
+                    // console.log('Fin reason: ', event.finishReason);
+                    // console.log('Reasoning: ', event.reasoning);
+                    // console.log('reasoning details: ', event.reasoningDetails);
+                    // console.log('Steps: ', event.steps);
+                    // console.log('Messages: ', event.response.messages);
+                    // console.log('Response Body: ', event.response.body);
+                    // console.log('Provider metadata: ', event.providerMetadata);
+                    // console.log("Sources: ", event.sources);
 
                     if (user?.id) {
                         try {

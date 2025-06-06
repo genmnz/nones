@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+'use client'
 import React, { useState } from 'react';
 import { DateTime } from 'luxon';
 import { cn } from "@/lib/utils";

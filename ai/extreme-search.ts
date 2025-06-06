@@ -149,7 +149,7 @@ const extremeSearch = async (
 
     // plan out the research
     const { object: plan } = await generateObject({
-        model: scira.languageModel("scira-grok-3"),
+        model: scira.languageModel("mind-grok-3"),
         schema: z.object({
             plan: z.array(
                 z.object({
@@ -191,7 +191,7 @@ Plan Guidelines:
 
     // Create the autonomous research agent with tools
     const { text } = await generateText({
-        model: scira.languageModel("scira-default"),
+        model: scira.languageModel("mind-default"),
         maxSteps: totalTodos + 2,
         system: `
 You are an autonomous deep research analyst. Your goal is to research the given research plan thoroughly with the given tools.

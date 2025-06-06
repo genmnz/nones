@@ -1,3 +1,4 @@
+'use client'
 // /components/reddit-search.tsx
 /* eslint-disable @next/next/no-img-element */
 import React, { useState } from 'react';

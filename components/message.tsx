@@ -525,7 +525,7 @@ export const Message: React.FC<MessageProps> = ({
         )}
 
         {/* Show retry option when assistant response is missing (not an error status) */}
-        {isMissingAssistantResponse && handleRetry && (
+        {/* {isMissingAssistantResponse && handleRetry && (
           <div className="mt-3">
             <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
               <div className="bg-amber-50 dark:bg-amber-900/30 px-4 py-3 border-b border-amber-200 dark:border-amber-800 flex items-start gap-3">
@@ -564,7 +564,7 @@ export const Message: React.FC<MessageProps> = ({
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Display error message with retry button */}
         {error && handleRetry && (

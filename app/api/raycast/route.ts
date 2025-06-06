@@ -1,5 +1,9 @@
+export const maxDuration = 60;
+
 import { serverEnv } from '@/env/server';
 import { xai } from '@ai-sdk/xai';
+import { deduplicateByDomainAndUrl, extractDomain } from '@/lib/utils';
+import { z } from 'zod';
 import { tavily } from '@tavily/core';
 import {
     convertToCoreMessages,
@@ -7,38 +11,14 @@ import {
     customProvider,
     generateText
 } from 'ai';
-import { z } from 'zod';
 
 const scira = customProvider({
     languageModels: {
-        'scira-default': xai("grok-3-beta"),
+        'mind-default': xai("grok-3-beta"),
     }
 })
 
-export const maxDuration = 300;
 
-const extractDomain = (url: string): string => {
-    const urlPattern = /^https?:\/\/([^/?#]+)(?:[/?#]|$)/i;
-    return url.match(urlPattern)?.[1] || url;
-};
-
-const deduplicateByDomainAndUrl = <T extends { url: string }>(items: T[]): T[] => {
-    const seenDomains = new Set<string>();
-    const seenUrls = new Set<string>();
-
-    return items.filter(item => {
-        const domain = extractDomain(item.url);
-        const isNewUrl = !seenUrls.has(item.url);
-        const isNewDomain = !seenDomains.has(domain);
-
-        if (isNewUrl && isNewDomain) {
-            seenUrls.add(item.url);
-            seenDomains.add(domain);
-            return true;
-        }
-        return false;
-    });
-};
 
 // Define separate system prompts for each group
 const groupSystemPrompts = {

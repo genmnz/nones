@@ -2,18 +2,18 @@
 
 import { clientEnv } from "@/env/client";
 import { ThemeProvider } from "next-themes";
-import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
+// import posthog from 'posthog-js';
+// import { PostHogProvider } from 'posthog-js/react';
 import { ReactNode } from "react";
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-if (typeof window !== 'undefined') {
-  posthog.init(clientEnv.NEXT_PUBLIC_POSTHOG_KEY!, {
-    api_host: clientEnv.NEXT_PUBLIC_POSTHOG_HOST,
-    person_profiles: 'always',
-  })
-}
+// if (typeof window !== 'undefined') {
+//   posthog.init(clientEnv.NEXT_PUBLIC_POSTHOG_KEY!, {
+//     api_host: clientEnv.NEXT_PUBLIC_POSTHOG_HOST,
+//     person_profiles: 'always',
+//   })
+// }
 
 // Create a client
 const queryClient = new QueryClient({
@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <PostHogProvider client={posthog}>
+      {/* <PostHogProvider client={posthog}> */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -38,7 +38,7 @@ export function Providers({ children }: { children: ReactNode }) {
         >
           {children}
         </ThemeProvider>
-      </PostHogProvider>
+      {/* </PostHogProvider> */}
     </QueryClientProvider>
   )
 }

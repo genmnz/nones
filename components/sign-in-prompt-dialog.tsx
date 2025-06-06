@@ -2,10 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { signIn } from '@/lib/auth-client';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
