@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { ChatInterface } from '@/components/chat-interface';
-import { InstallPrompt } from '@/components/InstallPrompt';
+import { InstallPrompt } from '@/components/ui/InstallPrompt';
 import { ClassicLoader } from '@/components/ui/loading';
 
 const Home = () => {

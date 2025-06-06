@@ -16,7 +16,7 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import Image from 'next/image';
-import PlaceholderImage from './placeholder-image';
+import PlaceholderImage from '@/components/placeholder-image';
 
 type SearchImage = {
     url: string;

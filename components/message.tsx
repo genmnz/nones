@@ -7,7 +7,7 @@ import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Copy, Download, X, ExternalLink, Maximize2, FileText, Plus, AlignLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import { TextUIPart, ReasoningUIPart, ToolInvocationUIPart, SourceUIPart, StepStartUIPart } from '@ai-sdk/ui-utils';
-import { MarkdownRenderer, preprocessLaTeX } from '@/components/markdown';
+import { MarkdownRenderer, preprocessLaTeX } from '@/components/core/markdown';
 import { deleteTrailingMessages } from '@/app/actions';
 
 // Define MessagePart type

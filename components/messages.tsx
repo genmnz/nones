@@ -5,7 +5,7 @@ import { ReasoningPartView, ReasoningPart } from '@/components/reasoning-part';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertCircle, Copy, ShareIcon, Check } from 'lucide-react';
-import { MarkdownRenderer } from '@/components/markdown';
+import { MarkdownRenderer } from '@/components/core/markdown';
 import ToolInvocationListView from '@/components/tool-invocation-list-view';
 import { deleteTrailingMessages } from '@/app/actions';
 import { toast } from 'sonner';
@@ -133,32 +133,32 @@ const Messages: React.FC<MessagesProps> = ({
   // Check if we need to show retry due to missing assistant response (different from error status)
   const isMissingAssistantResponse = useMemo(() => {
     const lastMessage = memoizedMessages[memoizedMessages.length - 1];
-    
+
     // Case 1: Last message is user and no assistant response
     if (lastMessage?.role === 'user' && status === 'ready' && !error) {
       return true;
     }
-    
+
     // Case 2: Last message is assistant but is completely empty (no meaningful content)
     if (lastMessage?.role === 'assistant' && status === 'ready' && !error) {
       const parts = lastMessage.parts || [];
-      
+
       // Check if message has any meaningful content
-      const hasTextContent = parts.some((part: any) => 
+      const hasTextContent = parts.some((part: any) =>
         part.type === 'text' && part.text && part.text.trim() !== ''
       );
       const hasToolInvocations = parts.some((part: any) => part.type === 'tool-invocation');
       const hasReasoningContent = parts.some((part: any) => part.type === 'reasoning');
-      
+
       // Also check legacy content field
       const hasLegacyContent = lastMessage.content && lastMessage.content.trim() !== '';
-      
+
       // If there's no meaningful content at all, show retry
       if (!hasTextContent && !hasToolInvocations && !hasReasoningContent && !hasLegacyContent) {
         return true;
       }
     }
-    
+
     return false;
   }, [memoizedMessages, status, error]);
 
@@ -174,7 +174,7 @@ const Messages: React.FC<MessagesProps> = ({
     if (part.type === "text") {
       // For empty text parts in a streaming message, show loading animation
       if ((!part.text || part.text.trim() === "") && status === 'streaming') {
-        
+
         return (
           <div key={`${messageIndex}-${partIndex}-loading`} className="flex flex-col min-h-[calc(100vh-18rem)]">
             {/* <SciraLogoHeader /> */}
@@ -185,7 +185,7 @@ const Messages: React.FC<MessagesProps> = ({
           </div>
         );
       }
-      
+
       // Skip empty text parts entirely for non-streaming states
       if (!part.text || part.text.trim() === "") return null;
 
@@ -198,14 +198,14 @@ const Messages: React.FC<MessagesProps> = ({
           partIndex,
           messageIndex
         }));
-        
+
         // Extract this text but don't render it in its original position
         return null;
       }
     }
 
     switch (part.type) {
-      case "text":        
+      case "text":
         return (
           <div key={`${messageIndex}-${partIndex}-text`}>
             <div>
@@ -280,15 +280,15 @@ const Messages: React.FC<MessagesProps> = ({
                         // Then copy the share link using the current URL
                         const shareUrl = `${window.location.origin}/search/${chatId}`;
                         await navigator.clipboard.writeText(shareUrl);
-                        
-                        return selectedVisibilityType === 'private' 
+
+                        return selectedVisibilityType === 'private'
                           ? "Chat made public and link copied to clipboard"
                           : "Share link copied to clipboard";
                       };
 
                       toast.promise(sharePromise(), {
-                        loading: selectedVisibilityType === 'private' 
-                          ? "Making chat public and copying link..." 
+                        loading: selectedVisibilityType === 'private'
+                          ? "Making chat public and copying link..."
                           : "Copying share link...",
                         success: (message) => message,
                         error: "Failed to share chat"
@@ -314,12 +314,12 @@ const Messages: React.FC<MessagesProps> = ({
                   }}
                   className="h-8 px-2 text-xs rounded-full"
                 >
-                  {isCopied ? 
-                  <>
-                  <Check className="h-3.5 w-3.5" />
-                  <TextMorph>Copied</TextMorph>
-                  </>
-                  : 
+                  {isCopied ?
+                    <>
+                      <Check className="h-3.5 w-3.5" />
+                      <TextMorph>Copied</TextMorph>
+                    </>
+                    :
                     <>
                       <Copy className="h-3.5 w-3.5" />
                       <TextMorph>Copy</TextMorph>
@@ -367,10 +367,10 @@ const Messages: React.FC<MessagesProps> = ({
           // Render logo and title for the first step-start
           return (
             <div key={`${messageIndex}-${partIndex}-step-start-logo`}>
-                         <div className="flex items-center gap-2 ml-8 mt-2">
+              {/* <div className="flex items-center gap-2 mt-2">
               <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
               <TextMorph>computing</TextMorph>
-            </div>
+            </div> */}
             </div>
           );
         }
@@ -474,10 +474,10 @@ const Messages: React.FC<MessagesProps> = ({
           const isCurrentMessageUser = message.role === 'user';
           const isCurrentMessageAssistant = message.role === 'assistant';
           const isLastMessage = index === memoizedMessages.length - 1;
-          
+
           // Determine proper spacing between messages
           let messageClasses = '';
-          
+
           if (isCurrentMessageUser && isNextMessageAssistant) {
             // Reduce space between user message and its response
             messageClasses = 'mb-2';
@@ -490,10 +490,10 @@ const Messages: React.FC<MessagesProps> = ({
           } else {
             messageClasses = 'mb-3';
           }
-          
+
           return (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className={messageClasses}
             >
               <Message
@@ -528,27 +528,27 @@ const Messages: React.FC<MessagesProps> = ({
       {/* Loading animation when status is submitted with min-height to reserve space */}
       {status === 'submitted' && (
         <div className="flex items-start min-h-[calc(100vh-18rem)]">
-          <div className="w-full">
-          <div className="flex items-center gap-2 ml-8 mt-2">
+          {/* <div className="w-full">
+          <div className="flex items-center gap-2 mt-2">
               <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
               <TextMorph>computing</TextMorph>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
 
       {/* Reserve space for empty/streaming assistant message */}
       {status === 'streaming' && isWaitingForResponse && (
         <div className="min-h-[calc(100vh-18rem)] mt-2">
-          <div className="flex items-center gap-2 ml-8 mt-2">
-              <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
-              <TextMorph>computing</TextMorph>
-            </div>
+          <div className="flex items-center gap-2 mt-2">
+            <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
+            <TextMorph>computing</TextMorph>
+          </div>
           {/* Content will be populated by the streaming message */}
         </div>
       )}
 
-      
+
 
       <div ref={reasoningScrollRef} />
       <div ref={messagesEndRef} />

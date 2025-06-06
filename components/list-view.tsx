@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
-import PlaceholderImage from './placeholder-image';
+import PlaceholderImage from '@/components/placeholder-image';
 
 
 interface Location {

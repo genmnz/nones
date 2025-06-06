@@ -3,7 +3,7 @@ import React, { useState, memo, useCallback } from 'react';
 import { cn } from "@/lib/utils";
 import InteractiveMap from './interactive-maps';
 import PlaceCard from './place-card';
-import { Badge } from './ui/badge';
+import { Badge } from '../ui/badge';
 import { AlertCircle } from 'lucide-react';
 
 interface Location {

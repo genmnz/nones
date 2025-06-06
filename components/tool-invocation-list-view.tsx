@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Wave } from "@foobar404/wave";
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { SearchLoadingState } from '@/components/uihelper';
 import { ArrowUpRight, LucideIcon, User2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
@@ -26,6 +27,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 // Icons
 import { Book, Building, ChevronDown, Cloud, Copy, ExternalLink, Film, Globe, Loader2, MapPin, Pause, Plane, Play as PlayIcon, Server, TextIcon, TrendingUpIcon, Tv, XCircle, YoutubeIcon } from 'lucide-react';
 import { Memory, Clock as PhosphorClock, RedditLogo, RoadHorizon, XLogo } from '@phosphor-icons/react';
+import {YouTubeCardProps, YouTubeSearchResponse, VideoResult, VideoDetails} from '@/types/search'
 
 // Components
 // import { FlightTracker } from '@/components/flight-tracker';
@@ -44,161 +46,24 @@ import { Memory, Clock as PhosphorClock, RedditLogo, RoadHorizon, XLogo } from '
 // import MCPServerList from '@/components/mcp-server-list';
 // import RedditSearch from '@/components/reddit-search';
 const FlightTracker = dynamic(() => import('@/components/flight-tracker').then(mod => mod.FlightTracker), { ssr: false });
-const InteractiveChart = dynamic(() => import('@/components/interactive-charts'), { ssr: false });
-const MapComponent = dynamic(() => import('@/components/map-components').then(mod => mod.MapComponent), { ssr: false });
-const MapContainer = dynamic(() => import('@/components/map-components').then(mod => mod.MapContainer), { ssr: false });
+const InteractiveChart = dynamic(() => import('@/components/charts/interactive-charts'), { ssr: false });
+const MapComponent = dynamic(() => import('@/components/maps/map-components').then(mod => mod.MapComponent), { ssr: false });
+const MapContainer = dynamic(() => import('@/components/maps/map-components').then(mod => mod.MapContainer), { ssr: false });
 const TMDBResult = dynamic(() => import('@/components/movie-info'), { ssr: false });
-const MultiSearch = dynamic(() => import('@/components/multi-search'), { ssr: false });
-const NearbySearchMapView = dynamic(() => import('@/components/nearby-search-map-view'), { ssr: false });
+const MultiSearch = dynamic(() => import('@/components/search/multi-search'), { ssr: false });
+const NearbySearchMapView = dynamic(() => import('@/components/maps/nearby-search-map-view'), { ssr: false });
 const TrendingResults = dynamic(() => import('@/components/trending-tv-movies-results'), { ssr: false });
-const AcademicPapersCard = dynamic(() => import('@/components/academic-papers'), { ssr: false });
+const AcademicPapersCard = dynamic(() => import('@/components/search/academic-papers'), { ssr: false });
 const WeatherChart = dynamic(() => import('@/components/weather-chart'), { ssr: false });
-const InteractiveStockChart = dynamic(() => import('@/components/interactive-stock-chart'), { ssr: false });
+const InteractiveStockChart = dynamic(() => import('@/components/charts/interactive-stock-chart'), { ssr: false });
 const CurrencyConverter = dynamic(() => import('@/components/currency_conv').then(mod => mod.CurrencyConverter), { ssr: false });
-const ExtremeSearch = dynamic(() => import('@/components/extreme-search').then(mod => mod.ExtremeSearch), { ssr: false });
+const ExtremeSearch = dynamic(() => import('@/components/search/extreme-search').then(mod => mod.ExtremeSearch), { ssr: false });
 const MemoryManager = dynamic(() => import('@/components/memory-manager'), { ssr: false });
-const MCPServerList = dynamic(() => import('@/components/mcp-server-list'), { ssr: false });
-const RedditSearch = dynamic(() => import('@/components/reddit-search'), { ssr: false });
-import XSearch from '@/components/x-search';
-
+const MCPServerList = dynamic(() => import('@/components/search/mcp-server-list'), { ssr: false });
+const RedditSearch = dynamic(() => import('@/components/search/reddit-search'), { ssr: false });
+import XSearch from '@/components/search/x-search';
 // Actions
 import { generateSpeech } from '@/app/actions';
-
-// Interfaces
-interface VideoDetails {
-    title?: string;
-    author_name?: string;
-    author_url?: string;
-    thumbnail_url?: string;
-    type?: string;
-    provider_name?: string;
-    provider_url?: string;
-    height?: number;
-    width?: number;
-}
-
-interface VideoResult {
-    videoId: string;
-    url: string;
-    details?: VideoDetails;
-    captions?: string;
-    timestamps?: string[];
-    views?: string;
-    likes?: string;
-    summary?: string;
-}
-
-interface YouTubeSearchResponse {
-    results: VideoResult[];
-}
-
-interface YouTubeCardProps {
-    video: VideoResult;
-    index: number;
-}
-
-// Now adding the SearchLoadingState component
-const SearchLoadingState = ({
-    icon: Icon,
-    text,
-    color
-}: {
-    icon: LucideIcon,
-    text: string,
-    color: "red" | "green" | "orange" | "violet" | "gray" | "blue"
-}) => {
-    const colorVariants = {
-        red: {
-            background: "bg-red-50 dark:bg-red-950",
-            border: "from-red-200 via-red-500 to-red-200 dark:from-red-400 dark:via-red-500 dark:to-red-700",
-            text: "text-red-500",
-            icon: "text-red-500"
-        },
-        green: {
-            background: "bg-green-50 dark:bg-green-950",
-            border: "from-green-200 via-green-500 to-green-200 dark:from-green-400 dark:via-green-500 dark:to-green-700",
-            text: "text-green-500",
-            icon: "text-green-500"
-        },
-        orange: {
-            background: "bg-orange-50 dark:bg-orange-950",
-            border: "from-orange-200 via-orange-500 to-orange-200 dark:from-orange-400 dark:via-orange-500 dark:to-orange-700",
-            text: "text-orange-500",
-            icon: "text-orange-500"
-        },
-        violet: {
-            background: "bg-violet-50 dark:bg-violet-950",
-            border: "from-violet-200 via-violet-500 to-violet-200 dark:from-violet-400 dark:via-violet-500 dark:to-violet-700",
-            text: "text-violet-500",
-            icon: "text-violet-500"
-        },
-        gray: {
-            background: "bg-neutral-50 dark:bg-neutral-950",
-            border: "from-neutral-200 via-neutral-500 to-neutral-200 dark:from-neutral-400 dark:via-neutral-500 dark:to-neutral-700",
-            text: "text-neutral-500",
-            icon: "text-neutral-500"
-        },
-        blue: {
-            background: "bg-blue-50 dark:bg-blue-950",
-            border: "from-blue-200 via-blue-500 to-blue-200 dark:from-blue-400 dark:via-blue-500 dark:to-blue-700",
-            text: "text-blue-500",
-            icon: "text-blue-500"
-        }
-    };
-
-    const variant = colorVariants[color];
-
-    return (
-        <Card className="relative w-full h-[100px] my-4 overflow-hidden shadow-none">
-            <BorderTrail
-                className={cn(
-                    'bg-linear-to-l',
-                    variant.border
-                )}
-                size={80}
-            />
-            <CardContent className="px-6!">
-                <div className="relative flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className={cn(
-                            "relative h-10 w-10 rounded-full flex items-center justify-center",
-                            variant.background
-                        )}>
-                            <BorderTrail
-                                className={cn(
-                                    "bg-linear-to-l",
-                                    variant.border
-                                )}
-                                size={40}
-                            />
-                            <Icon className={cn("h-5 w-5", variant.icon)} />
-                        </div>
-                        <div className="space-y-2">
-                            <TextShimmer
-                                className="text-base font-medium"
-                                duration={2}
-                            >
-                                {text}
-                            </TextShimmer>
-                            <div className="flex gap-2">
-                                {[...Array(3)].map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700 animate-pulse"
-                                        style={{
-                                            width: `${Math.random() * 40 + 20}px`,
-                                            animationDelay: `${i * 0.2}s`
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
 
 // Dedicated nearby search skeleton loading state
 const NearbySearchSkeleton = ({ type }: { type: string }) => {

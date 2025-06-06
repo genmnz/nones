@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useSession, signOut } from "@/lib/auth-client"
 import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ThemeSwitcher } from "./theme-switcher";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { Dialog } from "@/components/ui/dialog";
 import { MemoryDialog } from "./memory-dialog";
 import { User } from '@/lib/db/schema';
