@@ -257,7 +257,7 @@ const Navbar = memo(({
                                         <DropdownMenuTrigger asChild>
                                             <Button
                                                 variant="secondary"
-                                                className="rounded-md pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 text-sm bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors focus:outline-none"
+                                                className="w-fit !flex rounded-md pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 text-sm bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors focus:outline-none"
                                                 disabled={isChangingVisibility}
                                             >
                                                 {isChangingVisibility ? (

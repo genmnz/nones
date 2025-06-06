@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { ChatInterface } from '@/components/chat-interface';
+import { ChatInterface } from '@/components/tools/chat-interface';
 import { getUser } from '@/lib/auth-utils';
 import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
 import { Message } from '@/lib/db/schema';

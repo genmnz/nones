@@ -13,7 +13,7 @@ import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { Dialog } from "@/components/ui/dialog";
-import { MemoryDialog } from "./memory-dialog";
+import { MemoryDialog } from "./tools/memory-dialog";
 import { User } from '@/lib/db/schema';
 
 

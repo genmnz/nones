@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from 'react';
-import { ChatInterface } from '@/components/chat-interface';
+import { ChatInterface } from '@/components/tools/chat-interface';
 import { InstallPrompt } from '@/components/ui/InstallPrompt';
 import { ClassicLoader } from '@/components/ui/loading';
 
