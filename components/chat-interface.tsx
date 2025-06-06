@@ -10,7 +10,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 
 import FormComponent from '@/components/ui/form-component';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { cn, SearchGroupId, invalidateChatsCache } from '@/lib/utils';
+import { cn, invalidateChatsCache } from '@/lib/utils';
 import { getCurrentUser, /*suggestQuestions,*/ updateChatVisibility } from '@/app/actions';
 import Messages from '@/components/messages';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Navbar } from '@/components/navbar';
 import { SignInPromptDialog } from '@/components/sign-in-prompt-dialog';
+import { SearchGroupId } from '@/lib/search-groups';
 
 interface Attachment {
     name: string;

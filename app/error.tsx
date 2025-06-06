@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
 
 export default function Error({
   error,
@@ -60,7 +60,7 @@ export default function Error({
               variant="outline" 
               className="flex items-center gap-2 px-4 py-2 rounded-full"
             >
-              <ArrowLeft size={18} />
+                <ArrowRight size={18} />
               <span>Return to home</span>
             </Button>
           </Link>

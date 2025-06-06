@@ -14,7 +14,7 @@ const middleware = extractReasoningMiddleware({
     tagName: 'think',
 });
 
-export const scira = customProvider({
+export const mind = customProvider({
     languageModels: {
         'mind-default': xai("grok-3-mini"),
         'mind-grok-3': xai('grok-3'),
@@ -35,5 +35,6 @@ export const scira = customProvider({
         'mind-llama-4': groq('meta-llama/llama-4-maverick-17b-128e-instruct', {
             parallelToolCalls: false,
         }),
+        'mind-raycast': xai("grok-3-beta"),
     }
 })

@@ -10,7 +10,7 @@ import { Daytona, SandboxTargetRegion } from '@daytonaio/sdk';
 import { DataStreamWriter, generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 import { serverEnv } from "@/env/server";
-import { scira } from "@/ai/providers";
+import { mind } from "@/ai/providers";
 
 export const SYSTEM_PROMPT = `You are an expert researcher. Today is ${new Date().toISOString()}. Follow these instructions when responding:
   - You may be asked to research subjects that is after your knowledge cutoff, assume the user is right when presented with news.
@@ -149,7 +149,7 @@ const extremeSearch = async (
 
     // plan out the research
     const { object: plan } = await generateObject({
-        model: scira.languageModel("mind-grok-3"),
+        model: mind.languageModel("mind-grok-3"),
         schema: z.object({
             plan: z.array(
                 z.object({
@@ -191,7 +191,7 @@ Plan Guidelines:
 
     // Create the autonomous research agent with tools
     const { text } = await generateText({
-        model: scira.languageModel("mind-default"),
+        model: mind.languageModel("mind-default"),
         maxSteps: totalTodos + 2,
         system: `
 You are an autonomous deep research analyst. Your goal is to research the given research plan thoroughly with the given tools.

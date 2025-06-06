@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { updateChatVisibility } from '@/app/actions';
 import { invalidateChatsCache } from '@/lib/utils';
 import { TextMorph } from './core/text-morph';
+import { ClassicLoader } from './ui/loading';
 
 // Define interface for part, messageIndex and partIndex objects
 interface PartInfo {
@@ -48,7 +49,7 @@ interface MessagesProps {
 // const SciraLogoHeader = () => (
 //   <div className="flex items-center gap-2 mb-2">
 //     <Image 
-//       src="/scira.png" 
+//       src="/mind.png" 
 //       alt="Scira" 
 //       className='size-6 invert dark:invert-0' 
 //       width={100} 
@@ -177,11 +178,10 @@ const Messages: React.FC<MessagesProps> = ({
         return (
           <div key={`${messageIndex}-${partIndex}-loading`} className="flex flex-col min-h-[calc(100vh-18rem)]">
             {/* <SciraLogoHeader /> */}
-            <div className="flex space-x-2 ml-8 mt-2">
-              <div className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 animate-bounce" style={{ animationDelay: '300ms' }}></div>
-            </div>
+            {/* <div className="flex items-center gap-2 ml-8 mt-2">
+              <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
+              <TextMorph>computing</TextMorph>
+            </div> */}
           </div>
         );
       }
@@ -367,7 +367,10 @@ const Messages: React.FC<MessagesProps> = ({
           // Render logo and title for the first step-start
           return (
             <div key={`${messageIndex}-${partIndex}-step-start-logo`}>
-              {/* <SciraLogoHeader /> */}
+                         <div className="flex items-center gap-2 ml-8 mt-2">
+              <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
+              <TextMorph>computing</TextMorph>
+            </div>
             </div>
           );
         }
@@ -526,11 +529,9 @@ const Messages: React.FC<MessagesProps> = ({
       {status === 'submitted' && (
         <div className="flex items-start min-h-[calc(100vh-18rem)]">
           <div className="w-full">
-            {/* <SciraLogoHeader /> */}
-            <div className="flex space-x-2 ml-8 mt-2">
-              <div className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          <div className="flex items-center gap-2 ml-8 mt-2">
+              <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
+              <TextMorph>computing</TextMorph>
             </div>
           </div>
         </div>
@@ -539,7 +540,10 @@ const Messages: React.FC<MessagesProps> = ({
       {/* Reserve space for empty/streaming assistant message */}
       {status === 'streaming' && isWaitingForResponse && (
         <div className="min-h-[calc(100vh-18rem)] mt-2">
-          {/* <SciraLogoHeader /> */}
+          <div className="flex items-center gap-2 ml-8 mt-2">
+              <ClassicLoader size="sm" className="text-blue-600 dark:text-blue-300" />
+              <TextMorph>computing</TextMorph>
+            </div>
           {/* Content will be populated by the streaming message */}
         </div>
       )}

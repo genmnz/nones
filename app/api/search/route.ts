@@ -20,7 +20,7 @@ import Exa from 'exa-js';
 import { z } from 'zod';
 import MemoryClient from 'mem0ai';
 import { extremeSearchTool } from '@/ai/extreme-search';
-import { scira } from '@/ai/providers';
+import { mind } from '@/ai/providers';
 import { getUser } from "@/lib/auth-utils";
 import { createStreamId, getChatById, getMessagesByChatId, getStreamIdsByChatId, saveChat, saveMessages } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/errors';
@@ -80,8 +80,7 @@ const CURRENCY_SYMBOLS = {
     USD: '$', EUR: '€', GBP: '£',
     JPY: '¥', CNY: '¥', INR: '₹', RUB: '₽',
     KRW: '₩', BTC: '₿', THB: '฿', BRL: 'R$',
-    PHP: '₱', 
-    ILS: '₪', TRY: '₺', NGN: '₦', VND: '₫',
+    PHP: '₱', ILS: '₪', TRY: '₺', NGN: '₦', VND: '₫',
     ARS: '$', ZAR: 'R', AUD: 'A$', CAD: 'C$',
     SGD: 'S$', HKD: 'HK$', NZD: 'NZ$', MXN: 'Mex$'
 } as const;
@@ -417,7 +416,7 @@ export async function POST(req: Request) {
     const stream = createDataStream({
         execute: async (dataStream) => {
             const result = streamText({
-                model: scira.languageModel(model),
+                model: mind.languageModel(model),
                 messages: convertToCoreMessages(messages),
                 ...(!model.includes('mind-anthropic') || !model.includes('mind-o4-mini') ? {
                     temperature: 0,
@@ -428,7 +427,7 @@ export async function POST(req: Request) {
                     temperature: 0,
                 })),
                 maxSteps: 5,
-                maxRetries: 5,
+                maxRetries: 3,
                 experimental_activeTools: [...activeTools],
                 system: instructions + `\n\nThe user's location is ${latitude}, ${longitude}.`,
                 toolChoice: 'auto',
@@ -646,7 +645,7 @@ export async function POST(req: Request) {
                                         if (!result.title || result.title.trim() === "") {
                                             try {
                                                 const { object } = await generateObject({
-                                                    model: scira.languageModel("mind-google-flash-2.0"),
+                                                    model: mind.languageModel("mind-google-flash-2.0"),
                                                     prompt: `Complete the following financial report with an appropriate title. The report is about ${group.query} and contains this content: ${result.content.substring(0, 500)}...`,
                                                     schema: z.object({
                                                         title: z.string().describe("A descriptive title for the financial report")
@@ -973,7 +972,7 @@ print(f"Converted amount: {converted_amount}")
                         }),
                         execute: async ({ text, to }: { text: string; to: string }) => {
                             const { object: translation } = await generateObject({
-                                model: scira.languageModel(model),
+                                model: mind.languageModel(model),
                                 system: `You are a helpful assistant that translates text from one language to another.`,
                                 prompt: `Translate the following text to ${to} language: ${text}`,
                                 schema: z.object({
@@ -2225,7 +2224,7 @@ print(f"Converted amount: {converted_amount}")
                     const tool = tools[toolCall.toolName as keyof typeof tools];
 
                     const { object: repairedArgs } = await generateObject({
-                        model: scira.languageModel("mind-default"),
+                        model: mind.languageModel("mind-default"),
                         schema: tool.parameters,
                         prompt: [
                             `The model tried to call the tool "${toolCall.toolName}"` +

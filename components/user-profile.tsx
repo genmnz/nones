@@ -194,14 +194,14 @@ const UserProfile = memo(({ className, user }: { className?: string; user?: User
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" asChild>
-            <a href={"https://www.instagram.com/scira.ai"} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2">
+            <a href={"https://www.instagram.com/mind.ai"} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2">
               <InstagramLogoIcon className="size-4" />
               <span>Instagram</span>
             </a>
           </DropdownMenuItem>
           
           <DropdownMenuItem className="cursor-pointer" asChild>
-            <a href={"https://scira.userjot.com"} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2">
+            <a href={"https://mind.userjot.com"} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2">
               <BugIcon className="size-4" />
               <span>Feature/Bug Request</span>
             </a>

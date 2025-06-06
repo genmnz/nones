@@ -11,14 +11,15 @@ import { Textarea } from '../ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { BrainCircuit, EyeIcon, Globe, Upload, TelescopeIcon, X } from 'lucide-react';
-import { cn, SearchGroup, SearchGroupId, searchGroups } from '@/lib/utils';
+import { cn, getColorClasses } from '@/lib/utils';
+import { SearchGroup, SearchGroupId, searchGroups } from '@/lib/search-groups';
 import { UIMessage } from '@ai-sdk/ui-utils';
 import { track } from '@vercel/analytics';
 import { useSession } from '@/lib/auth-client';
 import { User } from '@/lib/db/schema';
 import { checkImageModeration } from '@/app/actions';
 import { ArrowUpIcon, StopIcon, PaperclipIcon } from '@/public/icons/form';
-import { getColorClasses } from '@/lib/utils';
+
 import { models } from '@/ai/models';
 
 interface ModelSwitcherProps {

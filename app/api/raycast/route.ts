@@ -1,7 +1,6 @@
 export const maxDuration = 60;
 
 import { serverEnv } from '@/env/server';
-import { xai } from '@ai-sdk/xai';
 import { deduplicateByDomainAndUrl, extractDomain } from '@/lib/utils';
 import { z } from 'zod';
 import { tavily } from '@tavily/core';
@@ -11,12 +10,8 @@ import {
     customProvider,
     generateText
 } from 'ai';
+import { mind } from '@/ai/providers';
 
-const scira = customProvider({
-    languageModels: {
-        'mind-default': xai("grok-3-beta"),
-    }
-})
 
 
 
@@ -83,7 +78,7 @@ export async function POST(req: Request) {
     const activeTools = group === 'x' ? ["x_search" as const] : group === 'web' ? ["web_search" as const] : ["web_search" as const, "x_search" as const];
 
     const { text, steps } = await generateText({
-        model: scira.languageModel(model),
+        model: mind.languageModel("mind-raycast"),
         system: systemPrompt,
         maxSteps: 5,
         messages: convertToCoreMessages(messages),

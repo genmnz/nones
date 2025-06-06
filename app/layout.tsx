@@ -11,7 +11,7 @@ import "./globals.css";
 import { Providers } from './providers';
 
 // export const metadata: Metadata = {
-//   metadataBase: new URL("https://scira.ai"),
+//   metadataBase: new URL("https://mind.ai"),
 //   title: {
 //     default: "Scira AI",
 //     template: "%s | Scira AI",
@@ -19,20 +19,20 @@ import { Providers } from './providers';
 //   },
 //   description: "Scira AI is a minimalistic AI-powered search engine that helps you find information on the internet.",
 //   openGraph: {
-//     url: "https://scira.ai",
+//     url: "https://mind.ai",
 //     siteName: "Scira AI",
 //   },
 //   keywords: [
-//     "scira.ai",
+//     "mind.ai",
 //     "scira ai",
 //     "Scira AI",
 //     "scira AI",
-//     "SCIRA.AI",
+//     "mind.AI",
 //     "scira github",
 //     "ai search engine",
 //     "Scira",
 //     "scira",
-//     "scira.app",
+//     "mind.app",
 //     "scira ai",
 //     "scira ai app",
 //     "scira",
@@ -46,7 +46,7 @@ import { Providers } from './providers';
 //     "mplx.run",
 //     "mplx ai",
 //     "zaid mukaddam",
-//     "scira.how",
+//     "mind.how",
 //     "search engine",
 //     "AI",
 //     "perplexity",

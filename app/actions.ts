@@ -2,11 +2,11 @@
 'use server';
 
 import { serverEnv } from '@/env/server';
-import { SearchGroupId } from '@/lib/utils';
+import { SearchGroupId } from '@/lib/search-groups';
 import { generateObject, UIMessage, generateText } from 'ai';
 import { z } from 'zod';
 import { getUser } from "@/lib/auth-utils";
-import { scira } from '@/ai/providers';
+import { mind } from '@/ai/providers';
 import { getChatsByUserId, deleteChatById, updateChatVisiblityById, getChatById, getMessageById, deleteMessagesByChatIdAfterTimestamp, updateChatTitleById } from '@/lib/db/queries';
 import { groq } from '@ai-sdk/groq';
 import { openai } from '@ai-sdk/openai';
@@ -99,7 +99,7 @@ export async function generateTitleFromUserMessage({
   message: UIMessage;
 }) {
   const { text: title } = await generateText({
-    model: scira.languageModel('mind-google-flash-2.0-lite'),
+    model: mind.languageModel('mind-google-flash-2.0-lite'),
     system: `\n
     - you will generate a short title based on the first message a user begins a conversation with
     - ensure it is not more than 80 characters long
