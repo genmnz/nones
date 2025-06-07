@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# dependegtg3ncies
 /node_modules
 /.pnp
 .pnp.js
@@ -38,6 +38,7 @@ next-env.d.ts
 
 e2b.toml
 certificates
+<<<<<<< HEAD
 lib/lib/utils.ts
 lib/lib/streaming/create-tool-calling-stream.ts
 lib/lib/streaming/index.ts
@@ -78,3 +79,6 @@ lib/lib/types/index.ts
 lib/lib/types/search.ts
 bun.lock
 bun.lock
+=======
+pnpm-lock.yaml
+>>>>>>> 4833a2a9102a856a45122e9aedbf3176b35b7397

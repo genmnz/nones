@@ -28,5 +28,15 @@ export const auth = betterAuth({
         // },
     },
     plugins: [nextCookies()],
-    trustedOrigins: ["http://localhost:3000", "https://mind.ai", "https://www.mind.ai"],
+    trustedOrigins: ["http://localhost:3000", "https://mind.ai", "https://www.mind.ai", "https://super-winner-v6vwvrp9wr9f66ww-3000.app.github.dev",
+
+        // Dynamically add origins from the ALLOWED_ORIGINS environment variable
+        ...(serverEnv.ALLOWED_ORIGINS 
+            ? serverEnv.ALLOWED_ORIGINS.split(',')
+                .map(origin => origin.trim()) // Trim whitespace from each origin
+                .filter(origin => origin.length > 0) // Filter out any empty strings
+            : [])
+    ].filter((value, index, self) => self.indexOf(value) === index),
+        
+    
 });

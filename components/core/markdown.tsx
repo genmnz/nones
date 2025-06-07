@@ -1,7 +1,7 @@
 'use client'
 import 'katex/dist/katex.min.css';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { JSX, useCallback, useMemo, useState } from 'react';
 import { Geist_Mono } from 'next/font/google';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight, oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';

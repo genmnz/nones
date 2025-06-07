@@ -35,7 +35,7 @@ import { auth } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { geolocation } from "@vercel/functions";
 import { getTweet } from 'react-tweet/api';
-import { deduplicateByDomainAndUrl, extractDomain } from '@/lib/utils';
+import { deduplicateByDomainAndUrl, extractDomain, isValidImageUrl } from '@/lib/utils';
 
 type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
 type ResponseMessage = ResponseMessageWithoutId & { id: string };
@@ -150,127 +150,6 @@ interface VideoResult {
 
 function sanitizeUrl(url: string): string {
     return url.replace(/\s+/g, '%20');
-}
-
-async function isValidImageUrl(url: string): Promise<{ valid: boolean; redirectedUrl?: string }> {
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-
-        const response = await fetch(url, {
-            method: 'HEAD',
-            signal: controller.signal,
-            headers: {
-                'Accept': 'image/*',
-                'User-Agent': 'Mozilla/5.0 (compatible; ImageValidator/1.0)'
-            },
-            redirect: 'follow' // Ensure redirects are followed
-        });
-
-        clearTimeout(timeout);
-
-        // Log response details for debugging
-        console.log(`Image validation [${url}]: status=${response.status}, content-type=${response.headers.get('content-type')}`);
-
-        // Capture redirected URL if applicable
-        const redirectedUrl = response.redirected ? response.url : undefined;
-
-        // Check if we got redirected (for logging purposes)
-        if (response.redirected) {
-            console.log(`Image was redirected from ${url} to ${redirectedUrl}`);
-        }
-
-        // Handle specific response codes
-        if (response.status === 404) {
-            console.log(`Image not found (404): ${url}`);
-            return { valid: false };
-        }
-
-        if (response.status === 403) {
-            console.log(`Access forbidden (403) - likely CORS issue: ${url}`);
-
-            // Try to use proxy instead of whitelisting domains
-            try {
-                // Attempt to handle CORS blocked images by trying to access via proxy
-                const controller = new AbortController();
-                const proxyTimeout = setTimeout(() => controller.abort(), 5000);
-
-                const proxyResponse = await fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`, {
-                    method: 'HEAD',
-                    signal: controller.signal
-                });
-
-                clearTimeout(proxyTimeout);
-
-                if (proxyResponse.ok) {
-                    const contentType = proxyResponse.headers.get('content-type');
-                    const proxyRedirectedUrl = proxyResponse.headers.get('x-final-url') || undefined;
-
-                    if (contentType && contentType.startsWith('image/')) {
-                        console.log(`Proxy validation successful for ${url}`);
-                        return {
-                            valid: true,
-                            redirectedUrl: proxyRedirectedUrl || redirectedUrl
-                        };
-                    }
-                }
-            } catch (proxyError) {
-                console.error(`Proxy validation failed for ${url}:`, proxyError);
-            }
-            return { valid: false };
-        }
-
-        if (response.status >= 400) {
-            console.log(`Image request failed with status ${response.status}: ${url}`);
-            return { valid: false };
-        }
-
-        // Check content type to ensure it's actually an image
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.startsWith('image/')) {
-            console.log(`Invalid content type for image: ${contentType}, url: ${url}`);
-            return { valid: false };
-        }
-
-        return { valid: true, redirectedUrl };
-    } catch (error) {
-        // Check if error is related to CORS
-        const errorMsg = error instanceof Error ? error.message : String(error);
-
-        if (errorMsg.includes('CORS') || errorMsg.includes('blocked by CORS policy')) {
-            console.error(`CORS error for ${url}:`, errorMsg);
-
-            // Try to use proxy instead of whitelisting domains
-            try {
-                // Attempt to handle CORS blocked images by trying to access via proxy
-                const controller = new AbortController();
-                const proxyTimeout = setTimeout(() => controller.abort(), 5000);
-
-                const proxyResponse = await fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`, {
-                    method: 'HEAD',
-                    signal: controller.signal
-                });
-
-                clearTimeout(proxyTimeout);
-
-                if (proxyResponse.ok) {
-                    const contentType = proxyResponse.headers.get('content-type');
-                    const proxyRedirectedUrl = proxyResponse.headers.get('x-final-url') || undefined;
-
-                    if (contentType && contentType.startsWith('image/')) {
-                        console.log(`Proxy validation successful for ${url}`);
-                        return { valid: true, redirectedUrl: proxyRedirectedUrl };
-                    }
-                }
-            } catch (proxyError) {
-                console.error(`Proxy validation failed for ${url}:`, proxyError);
-            }
-        }
-
-        // Log the specific error
-        console.error(`Image validation error for ${url}:`, errorMsg);
-        return { valid: false };
-    }
 }
 
 

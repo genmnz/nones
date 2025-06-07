@@ -82,6 +82,8 @@ export async function checkImageModeration(images: any) {
   return text
 }
 
+
+
 // Server action to get the current user
 export async function getCurrentUser() {
   try {
