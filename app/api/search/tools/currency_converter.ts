@@ -52,7 +52,7 @@ print(f"Converted amount: {converted_amount}")
   const sandbox = await daytona.create({
     image: "mind-analysis:1749032298",
     language: 'python',
-    target: SandboxTargetRegion.US,
+    // target: SandboxTargetRegion.US,
     resources: {
       cpu: 2,
       memory: 5,

@@ -29,7 +29,7 @@ export async function executeCodeInterpreter(
   const sandbox = await daytona.create({
     image: "mind-analysis:1749032298",
     language: 'python',
-    target: SandboxTargetRegion.US,
+    // target: SandboxTargetRegion.US,
     resources: {
       cpu: 4,
       memory: 8,

@@ -1,6 +1,24 @@
 import { AnthropicIcon, XAIIcon } from "@/public/icons/providers";
 import { GeminiIcon, GroqIcon, OpenAIIcon, QwenIcon } from "@/public/icons/providers";
 
+interface Model {
+    value: string;
+    label: string;
+    iconClass?: string;
+    description: string;
+    color?: string;
+    vision: boolean;
+    reasoning: boolean;
+    pdf: boolean;
+    icon: string | React.FunctionComponent<React.SVGProps<SVGSVGElement>>; // DO NOT Change icon type to string
+
+    category: string;
+    experimental: boolean;
+    thinking: boolean;
+}
+
+  
+
 export const models = [
     { value: "mind-default", label: "Grok 3.0 Mini", icon: XAIIcon, iconClass: "text-current", description: "xAI's most efficient reasoning model", color: "black", vision: false, reasoning: true, experimental: false, category: "Stable", pdf: false },
     { value: "mind-grok-3", label: "Grok 3.0", icon: XAIIcon, iconClass: "text-current", description: "xAI's most intelligent model", color: "gray", vision: false, reasoning: false, experimental: false, category: "Stable", pdf: false },
@@ -16,5 +34,5 @@ export const models = [
     { value: "mind-o4-mini", label: "o4 mini", icon: OpenAIIcon, iconClass: "text-current", description: "OpenAI's faster mini reasoning model", color: "blue", vision: true, reasoning: true, experimental: false, category: "Stable", pdf: false },
     { value: "mind-llama-4", label: "Llama 4 Maverick", icon: GroqIcon, iconClass: "text-current", description: "Meta's latest model", color: "blue", vision: true, reasoning: false, experimental: true, category: "Experimental", pdf: false },
     { value: "mind-qwq", label: "QWQ 32B", icon: QwenIcon, iconClass: "text-current", description: "Alibaba's advanced reasoning model", color: "purple", vision: false, reasoning: true, experimental: true, category: "Experimental", pdf: false },
-    { value: "mind-perplexity", label: "Perplexity Sonar Pro", icon: <PerplexityIcon />, iconClass: "text-current", description: "Perplexity's advanced reasoning model", color: "purple", vision: true, reasoning: true, experimental: false, category: "Stable", pdf: true },
+    { value: "mind-perplexity", label: "Perplexity Sonar Pro", icon: XAIIcon, iconClass: "text-current", description: "Perplexity's advanced reasoning model", color: "purple", vision: true, reasoning: true, experimental: false, category: "Stable", pdf: true },
 ];

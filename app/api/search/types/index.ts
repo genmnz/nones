@@ -1,10 +1,7 @@
 // lib\types\index.ts
 import { CreateMessage, Message, ChatRequestOptions } from 'ai'; // Moved ChatRequestOptions here
 import { UIMessage } from '@ai-sdk/ui-utils';
-import { SearchGroup, SearchGroupId } from '@/lib/utils'; // Assuming these are defined here or elsewhere in lib
-
-// This file will contain shared types and interfaces.
-// Add exports here as types are moved.
+import { SearchGroup, SearchGroupId } from '@/lib/search-groups';
 
 // General Model type (inferred from config/models.ts)
 export interface Model {

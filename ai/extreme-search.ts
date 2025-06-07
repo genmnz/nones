@@ -40,7 +40,7 @@ const pythonLibsAvailable = [
 
 const daytona = new Daytona({
     apiKey: serverEnv.DAYTONA_API_KEY,
-    target: SandboxTargetRegion.US,
+    // target: SandboxTargetRegion.US,
 });
 
 const runCode = async (code: string, installLibs: string[] = []) => {
