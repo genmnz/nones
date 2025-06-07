@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "scira",
+      "name": "scira", 
       "dependencies": {
         "@ai-sdk/anthropic": "^1.2.12",
         "@ai-sdk/google": "^1.2.19",
