@@ -37,7 +37,7 @@ interface ChatInterfaceProps {
     isOwner?: boolean;
 }
 
-const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility = 'private', isOwner = true }: ChatInterfaceProps): JSX.Element => {
+const ChatInterface: React.FC<ChatInterfaceProps> = memo(({ initialChatId, initialMessages, initialVisibility = 'private', isOwner = true }) => {
     const router = useRouter();
     const [query] = useQueryState('query', parseAsString.withDefault(''))
     const [q] = useQueryState('q', parseAsString.withDefault(''))
@@ -72,17 +72,17 @@ const ChatInterface = memo(({ initialChatId, initialMessages, initialVisibility 
     const personalizedGreeting = useMemo(() => {
         if (!user?.name) return "What do you want to explore?";
         const firstName = user.name.trim().split(' ')[0];
-        if (!firstName) return "What do you want to explore?";
+        if (!firstName) return "How can Melad help?";
         const greetings = [
             `Hey ${firstName}! Let's dive in!`,
             `${firstName}, what's the question?`,
-            `Ready ${firstName}? Ask me anything!`,
-            `Go ahead ${firstName}, I'm listening!`,
-            `${firstName}, fire away!`,
-            `What's cooking, ${firstName}?`,
+            `Search/ask anything, ${firstName}?`,
+            `Back at it ${firstName}!`,
+            `${firstName}, PRO TIP, CALL ME!`,
+            `Alright ${firstName}, time to decode some brilliance.`,
             `${firstName}, let's explore together!`,
-            `Hit me ${firstName}!`,
-            `${firstName}, what's the mystery?`,
+            `Hey ${firstName}, what shall we unravel today?`,
+            `Confidence ${firstName}, I’ve got your back.`,
             `Shoot ${firstName}, what's up?`
         ];
         

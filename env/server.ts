@@ -37,7 +37,7 @@ export const serverEnv = createEnv({
     MEM0_ORG_ID: z.string().min(1),
     MEM0_PROJECT_ID: z.string().min(1),
     SMITHERY_API_KEY: z.string().min(1),
-    ALLOWED_ORIGINS: z.string().optional().default('http://localhost:3000'),
+    ALLOWED_ORIGINS: z.string().optional().default('http://localhost:3000, https://super-winner-v6vwvrp9wr9f66ww-3000.app.github.dev'),
   },
   experimental__runtimeEnv: process.env,
 })

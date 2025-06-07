@@ -19,11 +19,7 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { User } from "@/lib/db/schema";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  useMutation,
-  useQueryClient,
-  useInfiniteQuery
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { cn, invalidateChatsCache } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ClassicLoader } from "./ui/loading";
