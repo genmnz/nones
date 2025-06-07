@@ -19,278 +19,17 @@ import { useSession } from '@/lib/auth-client';
 import { User } from '@/lib/db/schema';
 import { checkImageModeration } from '@/app/actions';
 import { ArrowUpIcon, StopIcon, PaperclipIcon } from '@/public/icons/form';
-
+import { ModelSwitcher } from "@/components/modelselector";
 import { models } from '@/ai/models';
+import { truncateFilename, AttachmentPreview } from "@/components/attachmentpreview";
+import { SwitchNotification } from "@/components/shownotification";
 
-interface ModelSwitcherProps {
-    selectedModel: string;
-    setSelectedModel: (value: string) => void;
-    className?: string;
-    showExperimentalModels: boolean;
-    attachments: Array<Attachment>;
-    messages: Array<Message>;
-    status: 'submitted' | 'streaming' | 'ready' | 'error';
-    onModelSelect?: (model: typeof models[0]) => void;
-}
+const MAX_FILES = 4;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_INPUT_CHARS = 10000;
 
 
 
-const ModelSwitcher: React.FC<ModelSwitcherProps> = ({ selectedModel, setSelectedModel, className, showExperimentalModels, attachments, messages, status, onModelSelect }) => {
-    const selectedModelData = models.find(model => model.value === selectedModel);
-    const [isOpen, setIsOpen] = useState(false);
-    const isProcessing = status === 'submitted' || status === 'streaming';
-
-    // Check for attachments in current and previous messages
-    const hasAttachments = attachments.length > 0 || messages.some(msg =>
-        msg.experimental_attachments && msg.experimental_attachments.length > 0
-    );
-
-    // Filter models based on attachments first
-    // Always show experimental models by removing the experimental filter
-    const filteredModels = hasAttachments
-        ? models.filter(model => model.vision)
-        : models;
-
-    // Group filtered models by category
-    const groupedModels = filteredModels.reduce((acc, model) => {
-        const category = model.category;
-        if (!acc[category]) {
-            acc[category] = [];
-        }
-        acc[category].push(model);
-        return acc;
-    }, {} as Record<string, typeof models>);
-
-    // Get hover color classes based on model color
-    const getHoverColorClasses = (modelColor: string) => {
-        switch (modelColor) {
-            case 'black': return 'hover:bg-black/20! dark:hover:bg-black/20!';
-            case 'gray': return 'hover:bg-gray-500/20! dark:hover:bg-gray-400/20!';
-            case 'indigo': return 'hover:bg-indigo-500/20! dark:hover:bg-indigo-400/20!';
-            case 'violet': return 'hover:bg-violet-500/20! dark:hover:bg-violet-400/20!';
-            case 'purple': return 'hover:bg-purple-500/20! dark:hover:bg-purple-400/20!';
-            case 'gemini': return 'hover:bg-teal-500/20! dark:hover:bg-teal-400/20!';
-            case 'blue': return 'hover:bg-blue-500/20! dark:hover:bg-blue-400/20!';
-            case 'vercel-gray': return 'hover:bg-zinc-500/20! dark:hover:bg-zinc-400/20!';
-            default: return 'hover:bg-neutral-500/20! dark:hover:bg-neutral-400/20!';
-        }
-    };
-
-    // Update getCapabilityColors to handle PDF capability
-    const getCapabilityColors = (capability: string) => {
-        if (capability === 'reasoning') {
-            return "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700";
-        } else if (capability === 'vision') {
-            return "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700";
-        } else if (capability === 'pdf') {
-            return "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800/50";
-        }
-        return "";
-    };
-
-    return (
-        <DropdownMenu
-            onOpenChange={setIsOpen}
-            modal={false}
-            open={isOpen && !isProcessing}
-        >
-            <DropdownMenuTrigger
-                className={cn(
-                    "flex items-center gap-2 p-2 sm:px-3 h-8",
-                    "rounded-full transition-all duration-200",
-                    "border border-neutral-200 dark:border-neutral-800",
-                    "hover:shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700",
-                    getColorClasses(selectedModelData?.color || "neutral", true),
-                    isProcessing && "opacity-50 pointer-events-none",
-                    "ring-0 outline-hidden",
-                    "group",
-                    className
-                )}
-                disabled={isProcessing}
-            >
-                <div className="relative flex items-center gap-2">
-                    {selectedModelData && (
-                        typeof selectedModelData.icon === 'string' ? (
-                            <img
-                                src={selectedModelData.icon}
-                                alt={selectedModelData.label}
-                                className={cn(
-                                    "w-3.5 h-3.5 object-contain transition-all duration-300",
-                                    "group-hover:scale-110 group-hover:rotate-6",
-                                    selectedModelData.iconClass
-                                )}
-                            />
-                        ) : (
-                            <selectedModelData.icon
-                                className={cn(
-                                    "w-3.5 h-3.5 transition-all duration-300",
-                                    "group-hover:scale-110 group-hover:rotate-6",
-                                    selectedModelData.iconClass
-                                )}
-                            />
-                        )
-                    )}
-                    <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium overflow-hidden">
-                        <motion.div
-                            variants={{
-                                initial: { opacity: 0, y: 10 },
-                                animate: { opacity: 1, y: 0 },
-                                exit: { opacity: 0, y: -10 }
-                            }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 500,
-                                damping: 30,
-                                mass: 0.5
-                            }}
-                            className="whitespace-nowrap"
-                        >
-                            {selectedModelData?.label || ""}
-                        </motion.div>
-                        <motion.div
-                            animate={{
-                                rotate: isOpen ? 180 : 0
-                            }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 500,
-                                damping: 30
-                            }}
-                            className="opacity-60"
-                        >
-                            <svg
-                                width="8"
-                                height="5"
-                                viewBox="0 0 9 6"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path d="M1 1L4.5 4.5L8 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </motion.div>
-                    </span>
-                </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-                className="w-[260px]! p-1! font-sans! rounded-lg bg-white dark:bg-neutral-900 mt-2! z-52! shadow-lg border border-neutral-200 dark:border-neutral-800 max-h-[300px]! overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-transparent"
-                align="start"
-                side="bottom"
-                avoidCollisions={['submitted', 'streaming', 'ready', 'error'].includes(status)}
-                sideOffset={6}
-                forceMount
-            >
-                {Object.entries(groupedModels).map(([category, categoryModels], categoryIndex) => (
-                    <div key={category} className={cn("pt-0.5 pb-0.5", categoryIndex > 0 ? "mt-0.5 border-t border-neutral-200 dark:border-neutral-800" : "")}>
-                        <div className="px-1.5 py-0.5 text-xs! sm:text-[9px] font-medium text-neutral-500 dark:text-neutral-400">
-                            {category} Models
-                        </div>
-                        <div className="space-y-0.5">
-                            {categoryModels.map((model) => (
-                                <DropdownMenuItem
-                                    key={model.value}
-                                    onSelect={() => {
-                                        console.log("Selected model:", model.value);
-                                        setSelectedModel(model.value.trim());
-
-                                        // Call onModelSelect if provided
-                                        if (onModelSelect) {
-                                            // Show additional info about image attachments for vision models
-                                            onModelSelect(model);
-                                        }
-                                    }}
-                                    className={cn(
-                                        "flex items-center gap-2 px-1.5 py-1.5 rounded-md text-xs",
-                                        "transition-all duration-200",
-                                        "group/item",
-                                        selectedModel === model.value
-                                            ? getColorClasses(model.color, true)
-                                            : getHoverColorClasses(model.color)
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "flex items-center justify-center size-7 rounded-md",
-                                        "transition-all duration-300",
-                                        "group-hover/item:scale-110 group-hover/item:rotate-6",
-                                        selectedModel === model.value
-                                            ? "bg-white/20 dark:bg-white/10"
-                                            : "bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
-                                    )}>
-                                        {typeof model.icon === 'string' ? (
-                                            <img
-                                                src={model.icon}
-                                                alt={model.label}
-                                                className={cn(
-                                                    "w-4 h-4 object-contain",
-                                                    "transition-all duration-300",
-                                                    "group-hover/item:scale-110 group-hover/item:rotate-12",
-                                                    model.iconClass,
-                                                    model.value === "mind-optimus" && "invert"
-                                                )}
-                                            />
-                                        ) : (
-                                            <model.icon
-                                                className={cn(
-                                                    "size-4",
-                                                    "transition-all duration-300",
-                                                    "group-hover/item:scale-110 group-hover/item:rotate-12",
-                                                    model.iconClass
-                                                )}
-                                            />
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col gap-0 min-w-0 flex-1">
-                                        <div className="font-medium truncate text-[11px] flex items-center">
-                                            {model.label}
-                                        </div>
-                                        <div className="text-[9px] opacity-70 truncate leading-tight">
-                                            {model.description}
-                                        </div>
-                                        <div className="flex items-center gap-1 mt-0.5">
-                                            {(model.vision || model.reasoning || model.pdf) && (
-                                                <div className="flex gap-1">
-                                                    {model.vision && (
-                                                        <div className={cn(
-                                                            "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
-                                                            getCapabilityColors("vision")
-                                                        )}>
-                                                            <EyeIcon className="size-2.5" />
-                                                            <span>Vision</span>
-                                                        </div>
-                                                    )}
-                                                    {model.reasoning && (
-                                                        <div className={cn(
-                                                            "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
-                                                            getCapabilityColors("reasoning")
-                                                        )}>
-                                                            <BrainCircuit className="size-2.5" />
-                                                            <span>Reasoning</span>
-                                                        </div>
-                                                    )}
-                                                    {model.pdf && (
-                                                        <div className={cn(
-                                                            "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
-                                                            getCapabilityColors("pdf")
-                                                        )}>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="size-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                            </svg>
-                                                            <span>PDF</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </DropdownMenuItem>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-};
 
 interface Attachment {
     name: string;
@@ -299,182 +38,6 @@ interface Attachment {
     size: number;
 }
 
-
-const MAX_FILES = 4;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-const MAX_INPUT_CHARS = 10000;
-
-// Helper function to convert File to base64 data URL for moderation
-const fileToDataURL = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-};
-
-// Add this helper function near the top with other utility functions
-const supportsPdfAttachments = (modelValue: string): boolean => {
-    const selectedModel = models.find(model => model.value === modelValue);
-    return selectedModel?.pdf === true;
-};
-
-// Update the hasVisionSupport function to check for PDF support
-const hasVisionSupport = (modelValue: string): boolean => {
-    const selectedModel = models.find(model => model.value === modelValue);
-    return selectedModel?.vision === true;
-};
-
-// Update the getAcceptFileTypes function to use pdf property
-const getAcceptFileTypes = (modelValue: string): string => {
-    const selectedModel = models.find(model => model.value === modelValue);
-    if (selectedModel?.pdf) {
-        return "image/*,.pdf";
-    }
-    return "image/*";
-};
-
-const truncateFilename = (filename: string, maxLength: number = 20) => {
-    if (filename.length <= maxLength) return filename;
-    const extension = filename.split('.').pop();
-    const name = filename.substring(0, maxLength - 4);
-    return `${name}...${extension}`;
-};
-
-const AttachmentPreview: React.FC<{ attachment: Attachment | UploadingAttachment, onRemove: () => void, isUploading: boolean }> = ({ attachment, onRemove, isUploading }) => {
-    const formatFileSize = (bytes: number): string => {
-        if (bytes < 1024) return bytes + ' bytes';
-        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-        else return (bytes / 1048576).toFixed(1) + ' MB' +
-            (bytes > MAX_FILE_SIZE ? ' (exceeds 5MB limit)' : '');
-    };
-
-    const isUploadingAttachment = (attachment: Attachment | UploadingAttachment): attachment is UploadingAttachment => {
-        return 'progress' in attachment;
-    };
-
-    const isPdf = (attachment: Attachment | UploadingAttachment): boolean => {
-        if (isUploadingAttachment(attachment)) {
-            return attachment.file.type === 'application/pdf';
-        }
-        return (attachment as Attachment).contentType === 'application/pdf';
-    };
-
-    return (
-        <ViewTransition
-            name="home"
-            enter="page-enter"
-            exit="page-exit duration-400"
-    >
-        <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
-            className={cn(
-                "relative flex items-center shrink-0 z-0",
-                "bg-white/90 dark:bg-neutral-800/90 backdrop-blur-xs",
-                "border border-neutral-200/80 dark:border-neutral-700/80",
-                "rounded-2xl p-2 pr-8 gap-2.5",
-                "shadow-xs hover:shadow-md",
-                "hover:bg-white dark:hover:bg-neutral-800",
-                "transition-all duration-200 group"
-            )}
-        >
-            {isUploading ? (
-                <div className="w-8 h-8 flex items-center justify-center">
-                    <svg className="animate-spin h-4 w-4 text-neutral-500 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </div>
-            ) : isUploadingAttachment(attachment) ? (
-                <div className="w-8 h-8 flex items-center justify-center">
-                    <div className="relative w-6 h-6">
-                        <svg className="w-full h-full" viewBox="0 0 100 100">
-                            <circle
-                                className="text-neutral-200 dark:text-neutral-700 stroke-current"
-                                strokeWidth="8"
-                                cx="50"
-                                cy="50"
-                                r="40"
-                                fill="transparent"
-                            ></circle>
-                            <circle
-                                className="text-primary stroke-current"
-                                strokeWidth="8"
-                                strokeLinecap="round"
-                                cx="50"
-                                cy="50"
-                                r="40"
-                                fill="transparent"
-                                strokeDasharray={`${attachment.progress * 251.2}, 251.2`}
-                                transform="rotate(-90 50 50)"
-                            ></circle>
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-[10px] font-medium text-neutral-800 dark:text-neutral-200">{Math.round(attachment.progress * 100)}%</span>
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                <div className="w-8 h-8 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-900 shrink-0 ring-1 ring-neutral-200/50 dark:ring-neutral-700/50 flex items-center justify-center">
-                    {isPdf(attachment) ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500 dark:text-red-400">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <path d="M9 15v-2h6v2"></path>
-                            <path d="M12 18v-5"></path>
-                        </svg>
-                    ) : (
-                        <img
-                            src={(attachment as Attachment).url}
-                            alt={`Preview of ${attachment.name}`}
-                            className="h-full w-full object-cover"
-                        />
-                    )}
-                </div>
-            )}
-            <div className="grow min-w-0">
-                {!isUploadingAttachment(attachment) && (
-                    <p className="text-xs font-medium truncate text-neutral-800 dark:text-neutral-200">
-                        {truncateFilename(attachment.name)}
-                    </p>
-                )}
-                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
-                    {isUploadingAttachment(attachment)
-                        ? 'Uploading...'
-                        : formatFileSize((attachment as Attachment).size)}
-                </p>
-            </div>
-            <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                className={cn(
-                    "absolute -top-1.5 -right-1.5 p-0.5 m-0 rounded-full",
-                    "bg-white/90 dark:bg-neutral-800/90 backdrop-blur-xs",
-                    "border border-neutral-200/80 dark:border-neutral-700/80",
-                    "shadow-xs hover:shadow-md",
-                    "transition-all duration-200 z-20",
-                    "opacity-0 group-hover:opacity-100",
-                    "scale-75 group-hover:scale-100",
-                    "hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                )}
-            >
-                <X className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
-            </motion.button>
-        </motion.div>
-        </ViewTransition>
-    );
-};
-
-interface UploadingAttachment {
-    file: File;
-    progress: number;
-}
 
 interface FormComponentProps {
     input: string;
@@ -521,105 +84,39 @@ interface ToolbarButtonProps {
     onClick: () => void;
 }
 
-interface SwitchNotificationProps {
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-    isVisible: boolean;
-    modelColor?: string;
-    notificationType?: 'model' | 'group';
-}
 
-const SwitchNotification: React.FC<SwitchNotificationProps> = ({
-    icon,
-    title,
-    description,
-    isVisible,
-    modelColor = 'default',
-    notificationType = 'model'
-}) => {
-    // Icon color is always white for better contrast on colored backgrounds
-    const getIconColorClass = () => "text-white";
-
-    // Get background color for model notifications only
-    const getModelBgClass = (color: string) => {
-        switch (color) {
-            case 'black':
-                return 'bg-[#0F0F0F] dark:bg-[#0F0F0F] border-[#0F0F0F] dark:border-[#0F0F0F]';
-            case 'gray':
-                return 'bg-[#4E4E4E] dark:bg-[#4E4E4E] border-[#4E4E4E] dark:border-[#4E4E4E]';
-            case 'indigo':
-                return 'bg-[#4F46E5] dark:bg-[#4F46E5] border-[#4F46E5] dark:border-[#4F46E5]';
-            case 'violet':
-                return 'bg-[#8B5CF6] dark:bg-[#8B5CF6] border-[#8B5CF6] dark:border-[#8B5CF6]';
-            case 'purple':
-                return 'bg-[#5E5ADB] dark:bg-[#5E5ADB] border-[#5E5ADB] dark:border-[#5E5ADB]';
-            case 'gemini':
-                return 'bg-[#1EA896] dark:bg-[#1EA896] border-[#1EA896] dark:border-[#1EA896]';
-            case 'blue':
-                return 'bg-[#1C7DFF] dark:bg-[#1C7DFF] border-[#1C7DFF] dark:border-[#1C7DFF]';
-            case 'vercel-gray':
-                return 'bg-[#27272A] dark:bg-[#27272A] border-[#27272A] dark:border-[#27272A]';
-            default:
-                return 'bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700';
-        }
-    };
-
-    // For model notifications, use model colors. For group notifications, use default background.
-    const useModelColor = notificationType === 'model' && modelColor !== 'default';
-    const bgColorClass = useModelColor
-        ? getModelBgClass(modelColor)
-        : "bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700";
-
-    return (
-        <AnimatePresence>
-            {isVisible && (
-                <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{
-                        opacity: { duration: 0.2 },
-                        height: { duration: 0.2 }
-                    }}
-                    className={cn(
-                        "w-[97%] max-w-2xl overflow-hidden mx-auto z-0",
-                        "text-sm text-neutral-700 dark:text-neutral-300 -mb-[0.499px]"
-                    )}
-                >
-                    <div className={cn(
-                        "flex items-center gap-2 p-2 py-1 sm:p-2.5 sm:py-2 rounded-t-lg border border-b-0 shadow-xs backdrop-blur-xs",
-                        bgColorClass,
-                        useModelColor ? "text-white" : "text-neutral-900 dark:text-neutral-100"
-                    )}>
-                        {icon && (
-                            <span className={cn(
-                                "shrink-0 size-3.5 sm:size-4",
-                                useModelColor ? getIconColorClass() : "text-primary",
-                            )}>
-                                {icon}
-                            </span>
-                        )}
-                        <div className="flex flex-col items-start sm:flex-row sm:items-center sm:flex-wrap gap-x-1.5 gap-y-0.5">
-                            <span className={cn(
-                                "font-semibold text-xs sm:text-sm",
-                                useModelColor ? "text-white" : "text-neutral-900 dark:text-neutral-100"
-                            )}>
-                                {title}
-                            </span>
-                            <span className={cn(
-                                "text-[10px] sm:text-xs leading-tight",
-                                useModelColor ? "text-white/80" : "text-neutral-600 dark:text-neutral-400"
-                            )}>
-                                {description}
-                            </span>
-                        </div>
-                    </div>
-                </motion.div>
-            )}
-        </AnimatePresence>
-    );
+// Helper function to convert File to base64 data URL for moderation
+const fileToDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 };
+
+// Add this helper function near the top with other utility functions
+const supportsPdfAttachments = (modelValue: string): boolean => {
+    const selectedModel = models.find(model => model.value === modelValue);
+    return selectedModel?.pdf === true;
+};
+
+// Update the hasVisionSupport function to check for PDF support
+const hasVisionSupport = (modelValue: string): boolean => {
+    const selectedModel = models.find(model => model.value === modelValue);
+    return selectedModel?.vision === true;
+};
+
+// Update the getAcceptFileTypes function to use pdf property
+const getAcceptFileTypes = (modelValue: string): string => {
+    const selectedModel = models.find(model => model.value === modelValue);
+    if (selectedModel?.pdf) {
+        return "image/*,.pdf";
+    }
+    return "image/*";
+};
+
+
 
 const ToolbarButton = ({ group, isSelected, onClick }: ToolbarButtonProps) => {
     const Icon = group.icon;
@@ -889,13 +386,8 @@ const FormComponent: React.FC<FormComponentProps> = ({
         }
     };
 
-    const handleFocus = () => {
-        setIsFocused(true);
-    };
-
-    const handleBlur = () => {
-        setIsFocused(false);
-    };
+    const handleFocus = () => setIsFocused(true);
+    const handleBlur = () => setIsFocused(false);
 
     const handleGroupSelect = useCallback((group: SearchGroup) => {
         setSelectedGroup(group.id);
