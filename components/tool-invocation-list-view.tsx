@@ -61,6 +61,7 @@ const ExtremeSearch = dynamic(() => import('@/components/search/extreme-search')
 const MemoryManager = dynamic(() => import('@/components/tools/memory-manager'), { ssr: false });
 const MCPServerList = dynamic(() => import('@/components/search/mcp-server-list'), { ssr: false });
 const RedditSearch = dynamic(() => import('@/components/search/reddit-search'), { ssr: false });
+
 import XSearch from '@/components/search/x-search';
 // Actions
 import { generateSpeech } from '@/app/actions';
@@ -1496,6 +1497,40 @@ const ToolInvocationListView = memo(
                     }
                     
                     return <XSearch result={result} args={args} />;
+                }
+
+                if (toolInvocation.toolName === 'duckduckgo_search') {
+                    if (!result) {
+                        return <SearchLoadingState
+                            icon={Globe}
+                            text="Searching DuckDuckGo..."
+                            color="blue"
+                        />;
+                    }
+                    
+                    return <MultiSearch result={result} args={args} />;
+                }
+                if (toolInvocation.toolName === 'linkup_search') {
+                    if (!result) {
+                        return <SearchLoadingState
+                            icon={Globe}
+                            text="Searching Linkup..."
+                            color="blue"
+                        />;
+                    }
+                    
+                    return <MultiSearch result={result} args={args} />;
+                }
+                if (toolInvocation.toolName === 'exa_search') {
+                    if (!result) {
+                        return <SearchLoadingState
+                            icon={Globe}
+                            text="Searching Exa AI..."
+                            color="blue"
+                        />;
+                    }
+                    
+                    return <MultiSearch result={result} args={args} />;
                 }
 
                 return null;

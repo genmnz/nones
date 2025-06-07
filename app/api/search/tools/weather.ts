@@ -49,15 +49,9 @@ export async function executeGetWeatherData(
     
     // Step 2: Fetch weather data using OpenWeather API with the obtained coordinates
     const [weatherResponse, airPollutionResponse, dailyForecastResponse] = await Promise.all([
-      fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`
-      ),
-      fetch(
-        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=${apiKey}`
-      ),
-      fetch(
-        `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=16&appid=${apiKey}`
-      )
+      fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`),
+      fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=${apiKey}`),
+      fetch(`https://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=16&appid=${apiKey}`)
     ]);
 
     for (const response of [weatherResponse, airPollutionResponse, dailyForecastResponse]) {
@@ -77,9 +71,7 @@ export async function executeGetWeatherData(
     ]);
 
     // Step 3: Fetch air pollution forecast
-    const airPollutionForecastResponse = await fetch(
-      `https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`
-    );
+    const airPollutionForecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`);
 
     if (!airPollutionForecastResponse.ok) {
         const errorData = await airPollutionForecastResponse.text();

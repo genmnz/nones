@@ -2,8 +2,6 @@
 import { generateTitleFromUserMessage, getGroupConfig } from '@/app/actions';
 import { serverEnv } from '@/env/server';
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import { Daytona, SandboxTargetRegion } from '@daytonaio/sdk';
-import { tavily } from '@tavily/core';
 import {
     convertToCoreMessages,
     smoothStream,
@@ -38,9 +36,6 @@ import { Chat } from '@/lib/db/schema';
 import { auth } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { geolocation } from "@vercel/functions";
-import { getTweet } from 'react-tweet/api';
-import { deduplicateByDomainAndUrl, extractDomain, isValidImageUrl, sanitizeUrl } from '@/lib/utils';
-import { CURRENCY_SYMBOLS, VideoResult, GoogleResult, MapboxFeature, ExaResult, YouTubeSearchResponse, YouTubeCardProps  } from '@/types/search';
 import {
     executeStockChart, stockChartSchema,
     executeCurrencyConverter, currencyConverterSchema,
@@ -61,8 +56,11 @@ import {
     executeMemoryManager, memoryManagerSchema,
     executeRedditSearch, redditSearchSchema,
     executeFindPlaceOnMap, findPlaceOnMapSchema,
-    executeNearbyPlacesSearch, nearbyPlacesSearchSchema,
+    executeExaSearch, exaSearchSchema,
+    executeLinkupSearch, linkupSearchSchema,
+    executeDuckDuckGoSearch, duckDuckGoSearchSchema,
 } from './tools/index';
+import { executeNearbyPlacesSearch, nearbyPlacesSearchSchema } from './tools/nearby_search';
 
 // import { executeWolframAlpha, wolframAlphaSchema } from './tools/wolfram_alpha';
 
@@ -179,7 +177,6 @@ export async function POST(req: Request) {
                 message: messages[messages.length - 1],
             });
 
-            console.log("--------------------------------");
             console.log("Title: ", title);
             console.log("--------------------------------");
 
@@ -216,7 +213,6 @@ export async function POST(req: Request) {
         await createStreamId({ streamId, chatId: id });
     }
 
-    console.log("--------------------------------");
     console.log("Messages: ", messages);
     console.log("--------------------------------");
     console.log("Running with model: ", model.trim());
@@ -241,10 +237,10 @@ export async function POST(req: Request) {
                 experimental_activeTools: [...activeTools],
                 system: instructions + `\n\nThe user's location is ${latitude}, ${longitude}.`,
                 toolChoice: 'auto',
-                experimental_transform: smoothStream({
-                    chunking: 'word',
-                    delayInMs: 1,
-                }),
+                // experimental_transform: smoothStream({
+                //     chunking: 'word',
+                //     delayInMs: 1,
+                // }),
                 providerOptions: {
                     google: {
                         ...(model.includes('thinking') ? {
@@ -282,6 +278,22 @@ export async function POST(req: Request) {
                     },
                 },
                 tools: {
+                    exa_search: {
+                        description: 'Search the web using Exa neural search that understands the semantic meaning of queries.',
+                        parameters: exaSearchSchema,
+                        execute: async (params) => executeExaSearch(params, { serverEnv, dataStream }),
+                      },
+
+                      linkup_search: {
+                        description: `Search the web using Linkup. Supports different output types:\n- 'searchResults' (default): Returns raw search results and images.\n- 'sourcedAnswer': Returns a natural language answer with source citations.\n- 'structured': Returns a JSON object conforming to the provided 'structuredOutputSchema'. Requires 'structuredOutputSchema' parameter when used. IMPORTANT: The provided 'structuredOutputSchema' MUST be a valid JSON schema defining an OBJECT at its root. For example: { "type": "object", "properties": { ... } }.`,
+                        parameters: linkupSearchSchema,
+                        execute: async (params) => executeLinkupSearch(params, { serverEnv, dataStream }),
+                      },
+                      duckduckgo_search: {
+                        description: 'Search the web using DuckDuckGo.',
+                        parameters: duckDuckGoSearchSchema,
+                        execute: async (params) => executeDuckDuckGoSearch(params, { serverEnv, dataStream }),
+                      },
                     stock_chart: tool({
                         description: 'Get stock data and news for given stock symbols.',
                         parameters: stockChartSchema,
@@ -349,14 +361,14 @@ export async function POST(req: Request) {
                     }),
                     // Improved geocoding tool - combines forward and reverse geocoding in one tool
                     find_place_on_map: tool({
-                        description: 'Find places using Google Maps geocoding API. Supports both address-to-coordinates (forward) and coordinates-to-address (reverse) geocoding.',
+                        description: 'Find places using OpenStreetMap Nominatim geocoding API. Supports both address-to-coordinates (forward) and coordinates-to-address (reverse) geocoding.',
                         parameters: findPlaceOnMapSchema,
                         execute: async (params) => executeFindPlaceOnMap(params, { serverEnv }),
                     }),
                     
                     // Improved nearby search using Google Places Nearby Search API
                     nearby_places_search: tool({
-                        description: 'Search for nearby places using Google Places Nearby Search API.',
+                        description: 'Search for nearby places using OpenStreetMap Overpass API.',
                         parameters: nearbyPlacesSearchSchema,
                         execute: async (params) => executeNearbyPlacesSearch(params, { serverEnv }),
                     }),
