@@ -10,9 +10,13 @@ import {
     streamText,
     tool,
     generateObject,
+    Tool,
     NoSuchToolError,
+    CoreMessage,
     appendResponseMessages,
     CoreToolMessage,
+    CoreUserMessage,
+    CoreSystemMessage,
     CoreAssistantMessage,
     createDataStream
 } from 'ai';
@@ -35,8 +39,8 @@ import { auth } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { geolocation } from "@vercel/functions";
 import { getTweet } from 'react-tweet/api';
-import { deduplicateByDomainAndUrl, extractDomain, isValidImageUrl } from '@/lib/utils';
-
+import { deduplicateByDomainAndUrl, extractDomain, isValidImageUrl, sanitizeUrl } from '@/lib/utils';
+import { CURRENCY_SYMBOLS, VideoResult, GoogleResult, MapboxFeature, ExaResult, YouTubeSearchResponse, YouTubeCardProps  } from '@/types/search';
 type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
 type ResponseMessage = ResponseMessageWithoutId & { id: string };
 
@@ -76,106 +80,8 @@ function getStreamContext() {
 }
 
 
-const CURRENCY_SYMBOLS = {
-    USD: '$', EUR: '€', GBP: '£',
-    JPY: '¥', CNY: '¥', INR: '₹', RUB: '₽',
-    KRW: '₩', BTC: '₿', THB: '฿', BRL: 'R$',
-    PHP: '₱', ILS: '₪', TRY: '₺', NGN: '₦', VND: '₫',
-    ARS: '$', ZAR: 'R', AUD: 'A$', CAD: 'C$',
-    SGD: 'S$', HKD: 'HK$', NZD: 'NZ$', MXN: 'Mex$'
-} as const;
 
-interface MapboxFeature {
-    id: string;
-    name: string;
-    formatted_address: string;
-    geometry: {
-        type: string;
-        coordinates: number[];
-    };
-    feature_type: string;
-    context: string;
-    coordinates: number[];
-    bbox: number[];
-    source: string;
-}
-
-interface GoogleResult {
-    place_id: string;
-    formatted_address: string;
-    geometry: {
-        location: {
-            lat: number;
-            lng: number;
-        };
-        viewport: {
-            northeast: {
-                lat: number;
-                lng: number;
-            };
-            southwest: {
-                lat: number;
-                lng: number;
-            };
-        };
-    };
-    types: string[];
-    address_components: Array<{
-        long_name: string;
-        short_name: string;
-        types: string[];
-    }>;
-}
-
-interface VideoDetails {
-    title?: string;
-    author_name?: string;
-    author_url?: string;
-    thumbnail_url?: string;
-    type?: string;
-    provider_name?: string;
-    provider_url?: string;
-}
-
-interface VideoResult {
-    videoId: string;
-    url: string;
-    details?: VideoDetails;
-    captions?: string;
-    timestamps?: string[];
-    views?: string;
-    likes?: string;
-    summary?: string;
-}
-
-function sanitizeUrl(url: string): string {
-    return url.replace(/\s+/g, '%20');
-}
-
-
-
-// Initialize Exa client
 const exa = new Exa(serverEnv.EXA_API_KEY);
-
-// Add interface for Exa search results
-interface ExaResult {
-    title: string;
-    url: string;
-    publishedDate?: string;
-    author?: string;
-    score?: number;
-    id: string;
-    image?: string;
-    favicon?: string;
-    text: string;
-    highlights?: string[];
-    highlightScores?: number[];
-    summary?: string;
-    subpages?: ExaResult[];
-    extras?: {
-        links: any[];
-    };
-}
 
 // Modify the POST function to use the new handler
 export async function POST(req: Request) {

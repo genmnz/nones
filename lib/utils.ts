@@ -12,6 +12,10 @@ export function invalidateChatsCache() {
     window.dispatchEvent(event);
   }
 }
+export 
+function sanitizeUrl(url: string): string {
+    return url.replace(/\s+/g, '%20');
+}
 
 export const getColorClasses = (color: string, isSelected: boolean = false) => {
   const baseClasses = "transition-colors duration-200";
