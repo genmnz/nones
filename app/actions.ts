@@ -188,9 +188,11 @@ const groupTools = {
     'web_search', 'get_weather_data',
     'retrieve', 'text_translate',
     'nearby_places_search', 'track_flight',
+
     'movie_or_tv_search', 'trending_movies', 
-    'find_place_on_map',
+    'find_place_on_map', 'duckduckgo_search', 'linkup_search', 'exa_search',
     'trending_tv', 'datetime', 'mcp_search'
+    
   ] as const,
   academic: ['academic_search', 'code_interpreter', 'datetime'] as const,
   youtube: ['youtube_search', 'datetime'] as const,

@@ -9,20 +9,17 @@ export type WeatherParams = z.infer<typeof weatherSchema>;
 // Define the context required by the execute function
 interface WeatherContext {
   serverEnv: {
-      OPENWEATHER_API_KEY?: string;
+      OPENWEATHER_API_KEY: string;
   };
 }
 
 export async function executeGetWeatherData(
   { location }: z.infer<typeof weatherSchema>,
-  context: WeatherContext,
+  { serverEnv }: WeatherContext,
 ) {
-  const { serverEnv } = context;
   const apiKey = serverEnv.OPENWEATHER_API_KEY;
 
-  if (!apiKey) {
-    throw new Error("OPENWEATHER_API_KEY is not configured in server environment variables.");
-  }
+  if (!apiKey) throw new Error("OPENWEATHER_API_KEY is not configured in server environment variables.");
   
   try {
     // Log the location being searched
@@ -56,8 +53,8 @@ export async function executeGetWeatherData(
 
     for (const response of [weatherResponse, airPollutionResponse, dailyForecastResponse]) {
         if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(`OpenWeather API request failed with status ${response.status}: ${errorData}`);
+            const errorData = await response.json();
+            throw new Error(`OpenWeather API request failed with status ${response.status}: ${errorData.message}`);
         }
     }
 
@@ -74,8 +71,11 @@ export async function executeGetWeatherData(
     const airPollutionForecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`);
 
     if (!airPollutionForecastResponse.ok) {
-        const errorData = await airPollutionForecastResponse.text();
-        throw new Error(`OpenWeather air pollution forecast API request failed with status ${airPollutionForecastResponse.status}: ${errorData}`);
+        const errorData = await airPollutionForecastResponse.json();
+        throw new Error(`OpenWeather air pollution forecast API request failed with status 
+          ${airPollutionForecastResponse.status}: ${errorData.message}`);
+          // log full error data
+          console.error('Full error data:', errorData);
     }
     const airPollutionForecastData = await airPollutionForecastResponse.json();
 

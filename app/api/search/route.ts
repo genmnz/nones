@@ -1,7 +1,6 @@
 // /app/api/chat/route.ts
 import { generateTitleFromUserMessage, getGroupConfig } from '@/app/actions';
 import { serverEnv } from '@/env/server';
-import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import {
     convertToCoreMessages,
     smoothStream,
@@ -16,13 +15,12 @@ import {
     CoreUserMessage,
     CoreSystemMessage,
     CoreAssistantMessage,
-    createDataStream
+    createDataStream,
+    ToolSet
 } from 'ai';
 import Exa from 'exa-js';
-import { z } from 'zod';
-import MemoryClient from 'mem0ai';
 import { extremeSearchTool } from '@/ai/extreme-search';
-import { mind } from '@/ai/providers';
+import { mind, providerOptions } from '@/ai/providers';
 import { getUser } from "@/lib/auth-utils";
 import { createStreamId, getChatById, getMessagesByChatId, getStreamIdsByChatId, saveChat, saveMessages } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/errors';
@@ -109,7 +107,7 @@ const exa = new Exa(serverEnv.EXA_API_KEY);
 // Modify the POST function to use the new handler
 export async function POST(req: Request) {
     const { messages, model, group, timezone, id, selectedVisibilityType } = await req.json();
-    const { latitude, longitude } = geolocation(req);
+    // const { latitude, longitude } = geolocation(req);
     
     // Enhanced security checks
     const origin = req.headers.get('origin');
@@ -156,9 +154,9 @@ export async function POST(req: Request) {
         }
     }
 
-    console.log("--------------------------------");
-    console.log("Location: ", latitude, longitude);
-    console.log("--------------------------------");
+    // console.log("--------------------------------");
+    // console.log("Location: ", latitude, longitude);
+    // console.log("--------------------------------");
 
     const user = await getUser();
     const streamId = "stream-" + uuidv4();
@@ -235,55 +233,30 @@ export async function POST(req: Request) {
                 maxSteps: 5,
                 maxRetries: 3,
                 experimental_activeTools: [...activeTools],
-                system: instructions + `\n\nThe user's location is ${latitude}, ${longitude}.`,
+                // system: instructions + `\n\nThe user's location is ${latitude}, ${longitude}.`,
+                system: instructions,
                 toolChoice: 'auto',
                 // experimental_transform: smoothStream({
                 //     chunking: 'word',
                 //     delayInMs: 1,
                 // }),
-                providerOptions: {
-                    google: {
-                        ...(model.includes('thinking') ? {
-                            thinkingConfig: {
-                                includeThoughts: true,
-                                thinkingBudget: 1000,
-                            },
-                        } : {}),
-                    },
-                    openai: {
-                        ...(model === 'mind-o4-mini' ? {
-                            reasoningEffort: 'low',
-                            strictSchemas: true,
-                        } : {}),
-                        ...(model === 'mind-4o' ? {
-                            parallelToolCalls: false,
-                            strictSchemas: true,
-                        } : {}),
-                    } as OpenAIResponsesProviderOptions,
-                    xai: {
-                        ...(group === "chat" ? {
-                            search_parameters: {
-                                mode: "auto",
-                                return_citations: true
-                            }
-                        } : {}),
-                        ...(model === 'mind-default' ? {
-                            reasoningEffort: 'low',
-                        } : {}),
-                    },
-                    anthropic: {
-                        ...(model === 'mind-anthropic-thinking' || model === 'mind-anthropic-pro-thinking' ? {
-                            thinking: { type: 'enabled', budgetTokens: 12000 },
-                        } : {}),
-                    },
-                },
+
+                // experimental_transform: smoothStream({
+                //     chunking: 'word',
+                //     delayInMs: 1,
+                // }),
+                providerOptions: providerOptions(model, group),
                 tools: {
                     exa_search: {
                         description: 'Search the web using Exa neural search that understands the semantic meaning of queries.',
                         parameters: exaSearchSchema,
                         execute: async (params) => executeExaSearch(params, { serverEnv, dataStream }),
                       },
-
+                      web_search: tool({
+                        description: 'Search the web for information with 5-10 queries, max results and search depth.',
+                        parameters: webSearchSchema,
+                        execute: async (params) => executeWebSearch(params, { serverEnv, dataStream }),
+                    }),
                       linkup_search: {
                         description: `Search the web using Linkup. Supports different output types:\n- 'searchResults' (default): Returns raw search results and images.\n- 'sourcedAnswer': Returns a natural language answer with source citations.\n- 'structured': Returns a JSON object conforming to the provided 'structuredOutputSchema'. Requires 'structuredOutputSchema' parameter when used. IMPORTANT: The provided 'structuredOutputSchema' MUST be a valid JSON schema defining an OBJECT at its root. For example: { "type": "object", "properties": { ... } }.`,
                         parameters: linkupSearchSchema,
@@ -309,16 +282,17 @@ export async function POST(req: Request) {
                         parameters: xSearchSchema,
                         execute: async (params) => executeXSearch(params, { serverEnv }),
                     }),
+                    reddit_search: tool({
+                        description: 'Search Reddit content using Tavily API.',
+                        parameters: redditSearchSchema,
+                        execute: async (params) => executeRedditSearch(params, { serverEnv }),
+                    }),
                     text_translate: tool({
                         description: "Translate text from one language to another.",
                         parameters: textTranslateSchema,
                         execute: async (params) => executeTextTranslate(params, { serverEnv, model }),
                     }),
-                    web_search: tool({
-                        description: 'Search the web for information with 5-10 queries, max results and search depth.',
-                        parameters: webSearchSchema,
-                        execute: async (params) => executeWebSearch(params, { serverEnv, dataStream }),
-                    }),
+       
                     movie_or_tv_search: tool({
                         description: 'Search specifically for a movie or TV show or Documentary or Anime',
                         parameters: movieOrTvSearchSchema,
@@ -387,18 +361,16 @@ export async function POST(req: Request) {
                         parameters: mcpSearchSchema,
                         execute: async (params) => executeMcpSearch(params, { serverEnv }),
                     }),
-                    extreme_search: extremeSearchTool(dataStream),
                     memory_manager: tool({
                         description: 'Manage personal memories with add and search operations.',
                         parameters: memoryManagerSchema,
                         execute: async (params) => executeMemoryManager(params, { serverEnv, user }),
                     }),
-                    reddit_search: tool({
-                        description: 'Search Reddit content using Tavily API.',
-                        parameters: redditSearchSchema,
-                        execute: async (params) => executeRedditSearch(params, { serverEnv }),
-                    }),
-                },
+  
+                    extreme_search: extremeSearchTool(dataStream),
+
+                } as ToolSet,
+                // tools: toolsToUse as ToolSet,
                 experimental_repairToolCall: async ({
                     toolCall,
                     tools,
@@ -410,10 +382,7 @@ export async function POST(req: Request) {
                     }
 
                     console.log("Fixing tool call================================");
-                    console.log("toolCall", toolCall);
-                    console.log("tools", tools);
-                    console.log("parameterSchema", parameterSchema);
-                    console.log("error", error);
+                    console.log("toolCall", toolCall, "tools", tools, "parameterSchema", parameterSchema, "error", error);
 
                     const tool = tools[toolCall.toolName as keyof typeof tools];
 

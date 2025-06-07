@@ -510,7 +510,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = memo(({ initialChatId, initi
                         (!user && selectedVisibilityType === 'private')
                     ) && (
                         <div
-                            className="fixed bottom-4 sm:bottom-4 left-0 right-0 w-full max-w-[26rem] sm:max-w-2xl mx-auto z-20"
+                            className="fixed bottom-2 sm:bottom-4 left-0 right-0 w-full max-w-[26rem] sm:max-w-2xl mx-auto z-20"
                         >
                             <FormComponent
                                 chatId={chatId}

@@ -168,7 +168,7 @@ const ToolbarButton = ({ group, isSelected, onClick }: ToolbarButtonProps) => {
             <TooltipContent
                 side="bottom"
                 sideOffset={6}
-                className=" border-0 shadow-lg backdrop-blur-xs py-2 px-3 max-w-[200px]"
+                className=" max-w-[200px]"
             >
                 <div className="flex flex-col gap-0.5">
                     <span className="font-medium text-[11px]">{group.name}</span>
@@ -1184,7 +1184,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                             notificationType={switchNotification.notificationType}
                         />
 
-                        <div className="rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200! dark:border-neutral-700! focus-within:border-neutral-300! dark:focus-within:border-neutral-500! transition-colors duration-200">
+                        <div className="rounded-lg  border border-input transition-all duration-200">
                             <Textarea
                                 ref={inputRef}
                                 placeholder={hasInteracted ? "Ask a new question..." : "Ask a question..."}
@@ -1250,7 +1250,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                                     "flex justify-between items-center p-2 rounded-t-none rounded-b-lg",
                                     "bg-neutral-100 dark:bg-neutral-900",
                                     "border-t-0 border-neutral-200! dark:border-neutral-700!",
-                                    isProcessing ? "opacity-20! cursor-not-allowed!" : ""
+                                    // isProcessing ? "opacity-20! cursor-not-allowed!" : ""
                                 )}
                             >
                                 <div
@@ -1352,7 +1352,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                                                 <TooltipContent
                                                     side="bottom"
                                                     sideOffset={6}
-                                                    className=" border-0 shadow-lg backdrop-blur-xs py-2 px-3 max-w-[200px]"
+                                                    className=" max-w-[200px]"
                                                 >
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="font-medium text-[11px]">Extreme Mode</span>
@@ -1421,7 +1421,6 @@ const FormComponent: React.FC<FormComponentProps> = ({
                                                 <TooltipContent
                                                     side="bottom"
                                                     sideOffset={6}
-                                                    className=" border-0 shadow-lg backdrop-blur-xs py-2 px-3"
                                                 >
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="font-medium text-[11px]">Attach File</span>
@@ -1468,7 +1467,6 @@ const FormComponent: React.FC<FormComponentProps> = ({
                                                 <TooltipContent
                                                     side="bottom"
                                                     sideOffset={6}
-                                                    className="border-0 shadow-lg backdrop-blur-xs py-2 px-3"
                                                 >
                                                     <span className="font-medium text-[11px]">Stop Generation</span>
                                                 </TooltipContent>
@@ -1505,7 +1503,6 @@ const FormComponent: React.FC<FormComponentProps> = ({
                                                 <TooltipContent
                                                     side="bottom"
                                                     sideOffset={6}
-                                                    className="border-0 shadow-lg backdrop-blur-xs py-2 px-3"
                                                 >
                                                     <span className="font-medium text-[11px]">Send Message</span>
                                                 </TooltipContent>

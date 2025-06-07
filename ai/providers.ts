@@ -2,9 +2,9 @@ import {
     wrapLanguageModel, 
     customProvider, 
     extractReasoningMiddleware,
-} from "ai";
 
-import { openai } from "@ai-sdk/openai";
+} from "ai";
+import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import { xai } from "@ai-sdk/xai";
 import { groq } from "@ai-sdk/groq";
 import { anthropic } from "@ai-sdk/anthropic";
@@ -37,4 +37,41 @@ export const mind = customProvider({
         }),
         'mind-raycast': xai("grok-3-beta"),
     }
+})
+
+export const providerOptions = (model: string, group: string) => ({
+    google: {
+        ...(model.includes('thinking') ? {
+            thinkingConfig: {
+                includeThoughts: true,
+                thinkingBudget: 1000,   
+            },
+        } : {}),
+    },
+    openai: {
+        ...(model === 'mind-o4-mini' ? {
+            reasoningEffort: 'low',
+            strictSchemas: true,
+        } : {}),
+        ...(model === 'mind-4o' ? {
+            parallelToolCalls: false,
+            strictSchemas: true,
+        } : {}),
+    } as OpenAIResponsesProviderOptions,
+    xai: {
+        ...(group === "chat" ? {
+            search_parameters: {
+                mode: "auto",
+                return_citations: true
+            }
+        } : {}),
+        ...(model === 'mind-default' ? {
+            reasoningEffort: 'low',
+        } : {}),
+    },
+    anthropic: {
+        ...(model === 'mind-anthropic-thinking' || model === 'mind-anthropic-pro-thinking' ? {
+            thinking: { type: 'enabled', budgetTokens: 12000 },
+        } : {}),
+    },
 })
