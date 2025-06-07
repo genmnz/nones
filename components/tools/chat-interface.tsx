@@ -83,7 +83,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = memo(({ initialChatId, initi
             `${firstName}, let's explore together!`,
             `Hey ${firstName}, what shall we unravel today?`,
             `Confidence ${firstName}, I’ve got your back.`,
-            `Shoot ${firstName}, what's up?`
         ];
         
         // Use user ID + random UUID for truly random but stable greeting

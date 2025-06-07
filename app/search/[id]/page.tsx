@@ -1,9 +1,13 @@
+// @app/search/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import { ChatInterface } from '@/components/tools/chat-interface';
 import { getUser } from '@/lib/auth-utils';
 import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
 import { Message } from '@/lib/db/schema';
-import { Metadata } from 'next';
+
+export { generateMetadata } from './metadata';
+export const dynamic = 'force-dynamic';
+// export const revalidate = 0; // Disables ISR (Incremental Static Regeneration) — no caching at all.
 
 interface UIMessage {
   id: string;
@@ -13,62 +17,6 @@ interface UIMessage {
   createdAt: Date;
   experimental_attachments?: Array<any>;
 }
-
-// metadata
-// export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-//   const id = (await params).id;
-//   const chat = await getChatById({ id });
-//   const user = await getUser();
-//   // if not chat, return Scira Chat
-//   if (!chat) {
-//     return { title: 'Scira Chat' };
-//   }
-//   let title;
-//   // if chat is public, return title
-//   if (chat.visibility === 'public') {
-//     title = chat.title;
-//   }
-//   // if chat is private, return title
-//   if (chat.visibility === 'private') {
-//     if (!user) {
-//       title = 'Scira Chat';
-//     }
-//     if (user!.id !== chat.userId) {
-//       title = 'Scira Chat';
-//     }
-//     title = chat.title;
-//   }
-//   return {
-//     title: title, description: "A search in mind.ai",
-//     openGraph: {
-//       title: title,
-//       url: `https://mind.ai/s/${id}`,
-//       description: "A search in mind.ai",
-//       siteName: "mind.ai",
-//       images: [{
-//         url: `https://mind.ai/api/og/chat/${id}`,
-//         width: 1200,
-//         height: 630,
-//       }],
-//     },
-//     twitter: {
-//       card: 'summary_large_image',
-//       title: title,
-//       url: `https://mind.ai/s/${id}`,
-//       description: "A search in mind.ai",
-//       siteName: "mind.ai",
-//       creator: "@sciraai",
-//       images: [{
-//         url: `https://mind.ai/api/og/chat/${id}`,
-//         width: 1200,
-//         height: 630,
-//       }],
-//     },
-//     alternates: {
-//       canonical: `https://mind.ai/s/${id}`,
-//     },
-//   } as Metadata;
-// }
 
 function convertToUIMessages(messages: Array<Message>): Array<UIMessage> {
   return messages.map((message) => {
@@ -110,17 +58,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   console.log("Chat: ", chat);
-
   const user = await getUser();
 
   if (chat.visibility === 'private') {
-    if (!user) {
-      return notFound();
-    }
-
-    if (user.id !== chat.userId) {
-      return notFound();
-    }
+    if (!user) return notFound();
+    if (user.id !== chat.userId) return notFound();
   }
 
   // Fetch only the initial 20 messages for faster loading

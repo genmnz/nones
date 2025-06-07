@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Globe, Lock, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
@@ -41,39 +41,46 @@ const Navbar = memo(({
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [privateDropdownOpen, setPrivateDropdownOpen] = useState(false);
     const [isChangingVisibility, setIsChangingVisibility] = useState(false);
+    const [shareUrl, setShareUrl] = useState('');
+
+    useEffect(() => {
+        if (chatId) {
+            setShareUrl(`${window.location.origin}/search/${chatId}`);
+        }
+    }, [chatId]);
 
     const handleCopyLink = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
+        if (!shareUrl) return;
         if (!chatId) return;
 
-        const url = `${window.location.origin}/search/${chatId}`;
-        navigator.clipboard.writeText(url);
+        navigator.clipboard.writeText(shareUrl);
         setCopied(true);
         toast.success("Link copied to clipboard");
 
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Generate the share URL
-    const shareUrl = chatId ? `${window.location.origin}/search/${chatId}` : '';
-
     // Social media share handlers
     const handleShareLinkedIn = (e: React.MouseEvent) => {
         e.preventDefault();
+        if (!shareUrl) return;
         const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
         window.open(linkedInUrl, '_blank', 'noopener,noreferrer');
     };
 
     const handleShareTwitter = (e: React.MouseEvent) => {
         e.preventDefault();
+        if (!shareUrl) return;
         const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
         window.open(twitterUrl, '_blank', 'noopener,noreferrer');
     };
 
     const handleShareReddit = (e: React.MouseEvent) => {
         e.preventDefault();
+        if (!shareUrl) return;
         const redditUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(shareUrl)}`;
         window.open(redditUrl, '_blank', 'noopener,noreferrer');
     };

@@ -8,7 +8,7 @@ import { Wave } from "@foobar404/wave";
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { SearchLoadingState } from '@/components/uihelper';
-import { ArrowUpRight, LucideIcon, User2 } from 'lucide-react';
+import { ArrowUpRight, LucideIcon, User2, Youtube } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -745,7 +745,7 @@ const ToolInvocationListView = memo(
                             <div className="rounded-xl overflow-hidden border dark:border-neutral-800 border-neutral-200 bg-white dark:bg-neutral-900 shadow-xs p-4 text-center">
                                 <div className="flex flex-col items-center gap-3 py-6">
                                     <div className="flex items-center justify-center h-12 w-12 rounded-full bg-red-50 dark:bg-red-950/30">
-                                        <YoutubeIcon className="h-6 w-6 text-red-600" />
+                                        <Youtube className="h-6 w-6 text-red-600" />
                                     </div>
                                     <div className="text-center">
                                         <h2 className="text-base font-medium text-neutral-900 dark:text-neutral-100 mb-1">

@@ -27,7 +27,7 @@ export default function Error({
         transition={{ duration: 0.5 }}
         className="text-center max-w-md"
       >
-        <div className="mb-6 flex justify-center">
+        {/* <div className="mb-6 flex justify-center">
           <Image 
             src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzE2YzFlNWExYTJjZjkxZDUxOWQ1MmU2ZjA1NjYxNWIzYzVmMWQ5MSZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/aYpmlCXgX9dc09dbpl/giphy.gif"
             alt="Computer Error" 
@@ -36,7 +36,7 @@ export default function Error({
             className="rounded-lg"
             unoptimized
           />
-        </div>
+        </div> */}
         
         <h1 className="text-4xl mb-4 text-neutral-800 dark:text-neutral-100 font-syne">
           Something went wrong
