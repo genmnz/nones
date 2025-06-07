@@ -16,4 +16,5 @@ export const models = [
     { value: "mind-o4-mini", label: "o4 mini", icon: OpenAIIcon, iconClass: "text-current", description: "OpenAI's faster mini reasoning model", color: "blue", vision: true, reasoning: true, experimental: false, category: "Stable", pdf: false },
     { value: "mind-llama-4", label: "Llama 4 Maverick", icon: GroqIcon, iconClass: "text-current", description: "Meta's latest model", color: "blue", vision: true, reasoning: false, experimental: true, category: "Experimental", pdf: false },
     { value: "mind-qwq", label: "QWQ 32B", icon: QwenIcon, iconClass: "text-current", description: "Alibaba's advanced reasoning model", color: "purple", vision: false, reasoning: true, experimental: true, category: "Experimental", pdf: false },
+    { value: "mind-perplexity", label: "Perplexity Sonar Pro", icon: <PerplexityIcon />, iconClass: "text-current", description: "Perplexity's advanced reasoning model", color: "purple", vision: true, reasoning: true, experimental: false, category: "Stable", pdf: true },
 ];

@@ -4,7 +4,7 @@ import { UIMessage } from '@ai-sdk/ui-utils';
 import { ReasoningPartView, ReasoningPart } from '@/components/reasoning-part';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, AlertCircle, Copy, ShareIcon, Check } from 'lucide-react';
+import { RefreshCw, AlertCircle, Copy, ShareIcon, Check, FileIcon } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/core/markdown';
 import ToolInvocationListView from '@/components/tool-invocation-list-view';
 import { deleteTrailingMessages } from '@/app/actions';
@@ -13,6 +13,9 @@ import { updateChatVisibility } from '@/app/actions';
 import { invalidateChatsCache } from '@/lib/utils';
 import { TextMorph } from './core/text-morph';
 import { ClassicLoader } from './ui/loading';
+import { experimental_transcribe, TranscriptionModel } from 'ai';
+import { mind } from '@/ai/providers';
+
 
 // Define interface for part, messageIndex and partIndex objects
 interface PartInfo {
@@ -85,6 +88,8 @@ const Messages: React.FC<MessagesProps> = ({
   isOwner
 }) => {
   // Track visibility state for each reasoning section using messageIndex-partIndex as key
+  const [isTranscribing, setIsTranscribing] = useState(false);
+
   const [reasoningVisibilityMap, setReasoningVisibilityMap] = useState<Record<string, boolean>>({});
   const [reasoningFullscreenMap, setReasoningFullscreenMap] = useState<Record<string, boolean>>({});
   const reasoningScrollRef = useRef<HTMLDivElement>(null);
@@ -326,6 +331,22 @@ const Messages: React.FC<MessagesProps> = ({
                     </>
                   }
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    setIsTranscribing(true);
+                    const transcription = await experimental_transcribe({
+                      model: mind.languageModel('mind-transcribe')  as unknown as TranscriptionModel,
+                      audio: part.text,
+                    });
+                    console.log("Transcription: ", transcription);
+                    setIsTranscribing(false);
+                  }}
+                > 
+                  {isTranscribing ? <TextMorph>Transcribing...</TextMorph> : <TextMorph>Transcribe</TextMorph>}
+                </Button>
+                
               </div>
             )}
           </div>
@@ -387,6 +408,20 @@ const Messages: React.FC<MessagesProps> = ({
             message={message}
             annotations={message.annotations}
           />
+        );
+      case "source":
+        return (
+          <div key={`${messageIndex}-${partIndex}-source`}>
+            <TextMorph>Source</TextMorph>
+          </div>
+        );
+
+      case "file":
+        return (
+          <div key={`${messageIndex}-${partIndex}-file`}>
+            <FileIcon className="h-3.5 w-3.5" />
+            <TextMorph>File</TextMorph>
+          </div>
         );
       default:
         return null;

@@ -16,7 +16,11 @@ import {
     CoreSystemMessage,
     CoreAssistantMessage,
     createDataStream,
-    ToolSet
+    ToolSet,
+    StreamTextTransform,
+    generateId,
+    experimental_createMCPClient,
+    experimental_transcribe,
 } from 'ai';
 import Exa from 'exa-js';
 import { extremeSearchTool } from '@/ai/extreme-search';
@@ -32,8 +36,7 @@ import { after } from 'next/server';
 import { differenceInSeconds } from 'date-fns';
 import { Chat } from '@/lib/db/schema';
 import { auth } from '@/lib/auth';
-import { v4 as uuidv4 } from 'uuid';
-import { geolocation } from "@vercel/functions";
+// import { geolocation } from "@vercel/functions";
 import {
     executeStockChart, stockChartSchema,
     executeCurrencyConverter, currencyConverterSchema,
@@ -116,10 +119,8 @@ export async function POST(req: Request) {
     const allowedOrigins = serverEnv.ALLOWED_ORIGINS.split(',').map(origin => origin.trim());
 
     // Check for bot/automated requests
-    const suspiciousUserAgents = [
-        'curl', 'wget', 'python-requests', 'axios', 'node-fetch', 'PostmanRuntime',
-        'insomnia', 'httpie', 'RestSharp', 'okhttp'
-    ];
+    const suspiciousUserAgents = ['curl', 'wget', 'python-requests', 'axios', 'node-fetch', 'PostmanRuntime',
+        'insomnia', 'httpie', 'RestSharp', 'okhttp'];
     
     const isSuspiciousBot = suspiciousUserAgents.some(agent => 
         userAgent?.toLowerCase().includes(agent.toLowerCase())
@@ -156,15 +157,11 @@ export async function POST(req: Request) {
 
     // console.log("--------------------------------");
     // console.log("Location: ", latitude, longitude);
-    // console.log("--------------------------------");
 
     const user = await getUser();
-    const streamId = "stream-" + uuidv4();
+    const streamId = "stream-" + generateId();
 
-    if (!user) {
-        console.log("User not found");
-    }
-
+    if (!user) console.log("User not found");
     const { tools: activeTools, instructions } = await getGroupConfig(group);
 
     if (user) {
@@ -205,17 +202,14 @@ export async function POST(req: Request) {
         });
 
         console.log("--------------------------------");
-        console.log("Messages saved: ", messages);
+        console.log("Messages SAVED: ", messages);
         console.log("--------------------------------");
-
         await createStreamId({ streamId, chatId: id });
     }
 
     console.log("Messages: ", messages);
-    console.log("--------------------------------");
-    console.log("Running with model: ", model.trim());
-    console.log("Group: ", group);
-    console.log("Timezone: ", timezone);
+    console.log("Running with model: ", model.trim(), "Group: ", group, "Timezone: ", timezone);
+
 
     const stream = createDataStream({
         execute: async (dataStream) => {
@@ -236,15 +230,11 @@ export async function POST(req: Request) {
                 // system: instructions + `\n\nThe user's location is ${latitude}, ${longitude}.`,
                 system: instructions,
                 toolChoice: 'auto',
-                // experimental_transform: smoothStream({
-                //     chunking: 'word',
-                //     delayInMs: 1,
-                // }),
+                experimental_transform: smoothStream({
+                    chunking: 'word',
+                    delayInMs: 1,
+                }),
 
-                // experimental_transform: smoothStream({
-                //     chunking: 'word',
-                //     delayInMs: 1,
-                // }),
                 providerOptions: providerOptions(model, group),
                 tools: {
                     exa_search: {
@@ -333,14 +323,11 @@ export async function POST(req: Request) {
                         parameters: codeInterpreterSchema,
                         execute: async (params) => executeCodeInterpreter(params, { serverEnv }),
                     }),
-                    // Improved geocoding tool - combines forward and reverse geocoding in one tool
                     find_place_on_map: tool({
                         description: 'Find places using OpenStreetMap Nominatim geocoding API. Supports both address-to-coordinates (forward) and coordinates-to-address (reverse) geocoding.',
                         parameters: findPlaceOnMapSchema,
                         execute: async (params) => executeFindPlaceOnMap(params, { serverEnv }),
                     }),
-                    
-                    // Improved nearby search using Google Places Nearby Search API
                     nearby_places_search: tool({
                         description: 'Search for nearby places using OpenStreetMap Overpass API.',
                         parameters: nearbyPlacesSearchSchema,
@@ -370,7 +357,6 @@ export async function POST(req: Request) {
                     extreme_search: extremeSearchTool(dataStream),
 
                 } as ToolSet,
-                // tools: toolsToUse as ToolSet,
                 experimental_repairToolCall: async ({
                     toolCall,
                     tools,
